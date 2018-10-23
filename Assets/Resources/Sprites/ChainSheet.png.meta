@@ -1,0 +1,776 @@
+fileFormatVersion: 2
+guid: 963c83e514947e84eafa117a4ee00341
+timeCreated: 1531506059
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: ChainSheet_0
+    21300002: ChainSheet_1
+    21300004: ChainSheet_2
+    21300006: ChainSheet_3
+    21300008: ChainSheet_4
+    21300010: ChainSheet_5
+    21300012: ChainSheet_6
+    21300014: ChainSheet_7
+    21300016: ChainSheet_8
+    21300018: ChainSheet_9
+    21300020: ChainSheet_10
+    21300022: ChainSheet_11
+    21300024: ChainSheet_12
+    21300026: ChainSheet_13
+    21300028: ChainSheet_14
+    21300030: ChainSheet_15
+    21300032: ChainSheet_16
+    21300034: ChainSheet_17
+    21300036: ChainSheet_18
+    21300038: ChainSheet_19
+    21300040: ChainSheet_20
+    21300042: ChainSheet_21
+    21300044: ChainSheet_22
+    21300046: ChainSheet_23
+    21300048: ChainSheet_24
+    21300050: ChainSheet_25
+    21300052: ChainSheet_26
+    21300054: ChainSheet_27
+    21300056: ChainSheet_28
+    21300058: ChainSheet_29
+    21300060: ChainSheet_30
+    21300062: ChainSheet_31
+    21300064: ChainSheet_32
+    21300066: ChainSheet_33
+    21300068: ChainSheet_34
+    21300070: ChainSheet_35
+    21300072: ChainSheet_36
+    21300074: ChainSheet_37
+    21300076: ChainSheet_38
+    21300078: ChainSheet_39
+    21300080: ChainSheet_40
+    21300082: ChainSheet_41
+    21300084: ChainSheet_42
+    21300086: ChainSheet_43
+    21300088: ChainSheet_44
+    21300090: ChainSheet_45
+    21300092: ChainSheet_46
+    21300094: ChainSheet_47
+    21300096: ChainSheet_48
+    21300098: ChainSheet_49
+  serializedVersion: 4
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 1
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: 0
+    aniso: 16
+    mipBias: -1
+    wrapMode: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 0
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 32
+  alphaUsage: 0
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  platformSettings:
+  - buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+  - buildTarget: Standalone
+    maxTextureSize: 2048
+    textureFormat: 4
+    textureCompression: 1
+    compressionQuality: 100
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ChainSheet_0
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 469
+        width: 13
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_1
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 469
+        width: 14
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_2
+      rect:
+        serializedVersion: 2
+        x: 177
+        y: 469
+        width: 15
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_3
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 469
+        width: 16
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_4
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 469
+        width: 17
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_5
+      rect:
+        serializedVersion: 2
+        x: 366
+        y: 469
+        width: 18
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_6
+      rect:
+        serializedVersion: 2
+        x: 429
+        y: 469
+        width: 19
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_7
+      rect:
+        serializedVersion: 2
+        x: 492
+        y: 469
+        width: 20
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_8
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 405
+        width: 21
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_9
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 405
+        width: 22
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_10
+      rect:
+        serializedVersion: 2
+        x: 169
+        y: 405
+        width: 23
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_11
+      rect:
+        serializedVersion: 2
+        x: 232
+        y: 405
+        width: 24
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_12
+      rect:
+        serializedVersion: 2
+        x: 295
+        y: 405
+        width: 25
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_13
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 405
+        width: 26
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_14
+      rect:
+        serializedVersion: 2
+        x: 421
+        y: 405
+        width: 27
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_15
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 405
+        width: 29
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_16
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 341
+        width: 30
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_17
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 341
+        width: 31
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_18
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 341
+        width: 32
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_19
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 341
+        width: 33
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_20
+      rect:
+        serializedVersion: 2
+        x: 286
+        y: 341
+        width: 34
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_21
+      rect:
+        serializedVersion: 2
+        x: 348
+        y: 341
+        width: 36
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_22
+      rect:
+        serializedVersion: 2
+        x: 411
+        y: 341
+        width: 37
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_23
+      rect:
+        serializedVersion: 2
+        x: 474
+        y: 341
+        width: 38
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_24
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 277
+        width: 39
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_25
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 277
+        width: 40
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_26
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 277
+        width: 41
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_27
+      rect:
+        serializedVersion: 2
+        x: 214
+        y: 277
+        width: 42
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_28
+      rect:
+        serializedVersion: 2
+        x: 277
+        y: 277
+        width: 43
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_29
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 277
+        width: 44
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_30
+      rect:
+        serializedVersion: 2
+        x: 403
+        y: 277
+        width: 45
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_31
+      rect:
+        serializedVersion: 2
+        x: 466
+        y: 277
+        width: 46
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_32
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 213
+        width: 47
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_33
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 213
+        width: 48
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_34
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 213
+        width: 49
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_35
+      rect:
+        serializedVersion: 2
+        x: 206
+        y: 213
+        width: 50
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_36
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 213
+        width: 51
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_37
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 213
+        width: 52
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_38
+      rect:
+        serializedVersion: 2
+        x: 395
+        y: 213
+        width: 53
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_39
+      rect:
+        serializedVersion: 2
+        x: 458
+        y: 213
+        width: 54
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_40
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 149
+        width: 55
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_41
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 149
+        width: 56
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_42
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 149
+        width: 57
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_43
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 149
+        width: 58
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_44
+      rect:
+        serializedVersion: 2
+        x: 261
+        y: 149
+        width: 59
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_45
+      rect:
+        serializedVersion: 2
+        x: 324
+        y: 149
+        width: 60
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_46
+      rect:
+        serializedVersion: 2
+        x: 387
+        y: 149
+        width: 61
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_47
+      rect:
+        serializedVersion: 2
+        x: 450
+        y: 149
+        width: 62
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_48
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 85
+        width: 63
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: ChainSheet_49
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 85
+        width: 64
+        height: 21
+      alignment: 5
+      pivot: {x: 1, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
