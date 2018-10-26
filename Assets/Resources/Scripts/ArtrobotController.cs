@@ -1,10 +1,9 @@
 ﻿using System.Collections;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class ArtrobotController : MonoBehaviour {
+public class ArtrobotController : Character {
 
 
     public GameObject bulletPreFab;
@@ -28,7 +27,6 @@ public class ArtrobotController : MonoBehaviour {
     Vector2 end;
     Vector2 origin;
     Vector2 lastPos;
-    private bool isFacingRight;
     private bool isCrouching;
     float move;
     private bool isHitStunned;
@@ -45,12 +43,10 @@ public class ArtrobotController : MonoBehaviour {
 
     private Vector2 input;
     private Vector2 aimDir;
-    private const string standing = "standing", running = "running", climbing = "climbing",
+    private const string running = "running", climbing = "climbing",
         chaining = "chaining", aiming = "aiming", climbingAiming = "climbingAiming",
-        jumping = "jumping", falling = "falling", paused = "paused",
+        paused = "paused",
         swinging = "swinging";
-    private string state;
-    private string substate;
     private bool isTravelingUp;
     private bool isTravelingDown;
     private bool startFall;
@@ -62,16 +58,14 @@ public class ArtrobotController : MonoBehaviour {
     private float fallTime;
     private float fallPosition;
     private bool isColliding = false;
-    private Rigidbody2D rgdBdy;
     private bool isRidingPlatform = false;
     private Vector2 platformSpeed;
     private string pausedState;
-    private bool justTurnedAround = false;
     private Vector2 offset;
     private GameObject ridingPlatform;
     private BoxCollider2D climbCollide;
 
-    private List<Vector2> prevPos;
+    
     private List<Vector2> prevTriggVal;
 
     private Dictionary<string, int> CollideMap;
@@ -106,14 +100,14 @@ public class ArtrobotController : MonoBehaviour {
         gravityOn = true;
         lastAngle = 0;
         aimDir = new Vector2(1, 0);
-        state = falling;
+        state = standing;
         substate = "none";
         startFall = true;
         StartCoroutine("StartFall");
         rgdBdy = GetComponent<Rigidbody2D>();
         platformSpeed = new Vector2();
         offset = new Vector2();
-        prevPos = new List<Vector2>();
+        
         prevTriggVal = new List<Vector2>();
 
         transform.RotateAround(GetComponents<Collider2D>()
@@ -491,24 +485,24 @@ public class ArtrobotController : MonoBehaviour {
     }
 
     // Update is called once per 
-    void FixedUpdate()
+    public override void FixedUpdate()
     {
-   //     Debug.Log("IsFacingRight = " + isFacingRight);
+        //     Debug.Log("IsFacingRight = " + isFacingRight); 
+        base.FixedUpdate();
         FixedCount++;
 
         Vector2 currPos;
         Vector2 fixedPos = rgdBdy.position;
-        Vector2 localOffset = new Vector2();
+     //   Vector2 localOffset = new Vector2();
         Debug.Log("Fixed State = " + state);
         //Debug.Log("SubState = " + substate);
         switch (state)
         {
             case falling:
-                currPos = transform.position;
-                //fixedPos = new Vector2(rgdBdy.position.x, 
-                //    Physics.Gravity(fallTime, fallPosition, rgdBdy.position).y);
-                localOffset += playerPhysics.Gravity(transform.position);
-               // localOffset += new Vector2(0, -10.0f * Time.deltaTime);
+               // currPos = transform.position;
+                
+
+                // localOffset += new Vector2(0, -10.0f * Time.deltaTime);
                 if (chain.GetComponent<ChainController>().GetState().Equals("idle"))
                 {
                     anim.SetBool("IsFalling", true);
@@ -523,8 +517,10 @@ public class ArtrobotController : MonoBehaviour {
                 //fixedPos =  new Vector2(rgdBdy.position.x,
                 //    rgdBdy.position.y + (10.0f * Time.deltaTime));
                 //  localOffset += new Vector2(0, 10.0f * Time.deltaTime);
-                localOffset += playerPhysics.Gravity(transform.position);  
-                if (playerPhysics.StartedFalling())
+
+                //     localOffset += playerPhysics.Gravity(transform.position);  
+                localOffset += characPhysics.Gravity(transform.position);
+                if (characPhysics.StartedFalling())
                 {
                     SetFallState(true);
                 }
@@ -648,7 +644,7 @@ public class ArtrobotController : MonoBehaviour {
         }
     }
 
-    void LateUpdate()
+    public override void LateUpdate()
     {
         float half = width / 2.0f;
         float quart = width / 4.0f;
@@ -732,16 +728,8 @@ public class ArtrobotController : MonoBehaviour {
 
             }
         }
-
-        if (prevPos.Count == 2)
-        {
-            prevPos.RemoveAt(0);
-            prevPos.Add(transform.position);
-        }
-        else
-        {
-            prevPos.Add(transform.position);
-        }
+        base.LateUpdate();
+       
 
     } 
     
@@ -783,7 +771,8 @@ public class ArtrobotController : MonoBehaviour {
         // GetComponent<Rigidbody2D>().velocity = new Vector2(rigidbody2DVel.x, 12.0f);
         SetState(jumping);
         float jumpTime = Time.realtimeSinceStartup;
-        playerPhysics.StartPhysics(jumpTime, transform.position, 10.5f, 90.0f);
+        //  playerPhysics.StartPhysics(jumpTime, transform.position, 10.5f, 90.0f);
+        characPhysics.StartPhysics(jumpTime, transform.position, 10.5f, 90.0f);
         yield return new WaitForSeconds(0.3f);
         if (GetState().Equals(jumping))
         {
@@ -854,32 +843,23 @@ public class ArtrobotController : MonoBehaviour {
            // GetComponent<Rigidbody2D>().gravityScale = 1f;
         }
     } 
-    public void SetFallState(bool hasPhysics)
+    public override void SetFallState(bool hasPhysics)
     {
-        if (!hasPhysics)
-        {
-            fallTime = Time.realtimeSinceStartup;
-            fallPosition = transform.position.y;
-            playerPhysics.StartPhysics(fallTime, transform.position, 0, 0);
-            
-        }
+        base.SetFallState(hasPhysics);
         if (GetState().Equals(climbing))
         {
             anim.SetBool("isClimbing", false);
         }
         anim.SetBool("Jumped", false);
-        Debug.Log("Starting to Fall");
-        //    anim.SetBool("IsFalling", true);
-        SetState(falling);
         
     } 
 
     
    
-    void Sword()
+    public void Sword()
     {
-        GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
-        GetComponent<WowController>().Woosh();
+       // GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
+      //  GetComponent<WowController>().Woosh();
         anim.SetBool("sword", true);
         GetComponentInChildren<SwordController>().HitBox();
         if (Mathf.Abs(move) > 0.001f)
@@ -919,7 +899,8 @@ public class ArtrobotController : MonoBehaviour {
         if (isClimbing)
         {
             SetState(climbing);
-            playerPhysics.StopPhysics();
+            //  playerPhysics.StopPhysics();
+            characPhysics.StopPhysics();
             //transform.parent = surface.transform;
             //surface.GetComponent<ChainableController>().MovePlayer(true);
             GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
@@ -940,7 +921,7 @@ public class ArtrobotController : MonoBehaviour {
         return isClimbing;
     } 
 
-    public void SetState(string state)
+    public override void SetState(string state)
     {
         Debug.Log("Setting State from " + GetState() + " to " + state);
         if (GetState().Equals(climbing) || state.Equals(climbing))
@@ -965,11 +946,6 @@ public class ArtrobotController : MonoBehaviour {
         }
         this.state = state; 
     }
-
-    public string GetState()
-    {
-        return state;
-    } 
 
     public void SetSubState(string substate)
     {
@@ -1248,107 +1224,9 @@ public class ArtrobotController : MonoBehaviour {
 
     }
 
-    public void toggleDir()
-    {
-        isFacingRight = !isFacingRight;
-    }
-    public int IsTravelingVert()
-
-    {
-
-     //   Debug.Log("Current pos = " + transform.position.y);
-       
-    //    Debug.Log("Last Pos = " + lastPos.y);
-
-        if (prevPos.Count >= 2)
-        {
-       //     Debug.Log("prevPos[1] = " + prevPos[1].y);
-       //     Debug.Log("prevPos[0] = " + prevPos[0].y);
-
-            if (Mathf.Approximately(transform.position.y, prevPos[0].y))
-            {
-                return 0;
-            }
-
-            // Return 1 if traveling right
-            if (transform.position.y > prevPos[0].y)
-            {
-                return 1;
-            }
-            //Return -1 if traveling left
-            else if (transform.position.y < prevPos[0].y)
-            {
-                return -1;
-            }
-        }
-        return 0;
-
-
-        //   Debug.Log("Current pos = " + transform.position.y);
-        //   Debug.Log("Last Pos = " + lastPos.y); 
-
-        //float diff = transform.position.y - lastPos.y;
-
-        //if (Mathf.Approximately(transform.position.y,lastPos.y))
-        //{
-        //    return 0;
-        //}
-
-        //// Return 1 if traveling up
-        //if (transform.position.y > lastPos.y)
-        //{
-        //    return 1;
-        //}
-        ////Return -1 if traveling down
-        //else if (transform.position.y < lastPos.y)
-        //{
-        //    return -1;
-        //}
-        //// Return 0 if not moving at all vertically
-        //else
-        //{
-        //    return 0;
-        //}
-
-
-    }
-    public int IsTravelingHoriz()
-    {
-     //   Debug.Log("Current pos = " + transform.position.x);
-        
-     //   Debug.Log("Last Pos = " + lastPos.x); 
-
-        float diff = transform.position.x - lastPos.x;
-
-        if (prevPos.Count >= 2)
-        {
-       //     Debug.Log("prevPos[1] = " + prevPos[1].x);
-       //     Debug.Log("prevPos[0] = " + prevPos[0].x);
-            if (Mathf.Approximately(transform.position.x, prevPos[0].x))
-            {
-                return 0;
-            }
-
-            // Return 1 if traveling right
-            if (transform.position.x > prevPos[0].x)
-            {
-                return 1;
-            }
-            //Return -1 if traveling left
-            else if (transform.position.x < prevPos[0].x)
-            {
-                return -1;
-            }
-        }
-        
-        // Return 0 if not moving at all vertically
-            return 0;
-    }
-
-    public void RgdBdy(Vector2 newPos)
-    {
-        
-    }
+   
+    
+  
 
     public void ClimbLedge(GameObject topLedge)
     {
@@ -1491,9 +1369,10 @@ public class ArtrobotController : MonoBehaviour {
                 break;
         }
 
-        playerPhysics.StartPhysics(currTime, transform.position, knockVelocity, knockAngle);
-        
-      //  SetFallState(true);
+        //  playerPhysics.StartPhysics(currTime, transform.position, knockVelocity, knockAngle);
+        characPhysics.StartPhysics(currTime, transform.position, knockVelocity, knockAngle);
+
+        //  SetFallState(true);
     }
 
     public Vector2 Gravity()
@@ -1537,40 +1416,7 @@ public class ArtrobotController : MonoBehaviour {
         return fallInfo;
     }
 
-    public void TurnAround(int colliderChoice)
-    {
-        Debug.Log("Turning around");
-        StartCoroutine("JustTurned");
-    //    aimDir = Vector2.Scale(aimDir, new Vector2(-1, 1));
-        //  Debug.Log("aimDir = " + aimDir);
-        isFacingRight = !isFacingRight;
-        if (!GetComponents<BoxCollider2D>()[0].enabled)
-        {
-            GetComponents<BoxCollider2D>()[0].enabled = true;
-        }
-        float xMin = GetComponents<BoxCollider2D>()[0].bounds.min.x;
-        Debug.Log("xMin = " + xMin);
-        float xMax = GetComponents<BoxCollider2D>()[2].bounds.max.x;
-        Debug.Log("xMax = " + xMax);
-        float xAverage = (xMin + xMax) / 2;
-        float yCenter = GetComponents<BoxCollider2D>()[3].bounds.center.y;
-        Debug.Log("Turn pivot = " + xAverage);
-        if (colliderChoice == 3)
-        {
-            transform.RotateAround(new Vector3(xAverage, yCenter, 0), Vector3.up, 180.0f);
-        }
-        else
-        {
-            transform.RotateAround(GetComponents<BoxCollider2D>()
-                [colliderChoice].bounds.center, Vector3.up, 180.0f);
-        }
-        // transform.RotateAround(transform.position, Vector3.up, 180.0f);
-        //     GetComponent<BoxCollider2D>().bounds
-        //   transform.rotation = Quaternion.Euler(new Vector3(0, 180, 0));
-        //      transform.RotateAround(GetComponents<BoxCollider2D>()
-        //      [colliderChoice].bounds.center, Vector3.up, 180.0f);
-
-    } 
+    
 
     public void FallOffSwing()
     {
@@ -1621,12 +1467,7 @@ public class ArtrobotController : MonoBehaviour {
         }
     }
    
-    IEnumerator JustTurned()
-    {
-        justTurnedAround = true;
-        yield return new WaitForSeconds(0.01f);
-        justTurnedAround = false;
-    }
+   
 
     IEnumerator CrouchToggle()
     {
@@ -1654,9 +1495,9 @@ public class ArtrobotController : MonoBehaviour {
         GetComponents<BoxCollider2D>()[2].enabled = !GetComponents<BoxCollider2D>()[2].enabled;
 
     }
-    private void OnCollisionEnter2D(Collision2D collision)
+    public override void OnCollisionEnter2D(Collision2D collision)
     {
-
+        base.OnCollisionEnter2D(collision);
         // Makes Bouncless collisions possible!! 
 
         Debug.Log("Collision with  " + collision.gameObject.name);
@@ -1673,16 +1514,16 @@ public class ArtrobotController : MonoBehaviour {
         {
             CollideMap.Add(collisionName, 1);
         }
-        
+
         if (CollideMap.ContainsKey(layer))
         {
             int layerCount;
             CollideMap.TryGetValue(layer, out layerCount);
-            
+
             layerCount++;
             CollideMap.Remove(layer);
             CollideMap.Add(layer, layerCount);
-        } 
+        }
 
         else
         {
@@ -1700,19 +1541,19 @@ public class ArtrobotController : MonoBehaviour {
         Debug.Log("Min Surface Collider = " + collision.collider.bounds.min.x);
 
         Collider2D collider = collision.collider;
-        if (collision.gameObject.layer == 12  || collision.gameObject.layer == 11)
+        if (collision.gameObject.layer == 12 || collision.gameObject.layer == 11)
         {
-            
+
             if (state.Equals(swinging))
             {
                 FallOffSwing();
-          //      SetState(standing);
+                //      SetState(standing);
             }
 
-            BoxCollider2D surfaceCollider = (BoxCollider2D) collision.collider;
+            BoxCollider2D surfaceCollider = (BoxCollider2D)collision.collider;
             if (feetCollider.bounds.min.y >= surfaceCollider.bounds.max.y && GetState().Equals(falling))
             {
-               
+
                 SetState(standing);
                 anim.SetBool("IsFalling", false);
                 Debug.Log("Collision with ground, setting state to Standing");
@@ -1734,7 +1575,7 @@ public class ArtrobotController : MonoBehaviour {
                         CollideMap.Remove(collisionName);
                         CollideMap.Remove(layer);
                         CollideMap.Add(layer, layerCount);
-                   //     SetFallState(false);
+                        //     SetFallState(false);
                     }
                 }
             }
@@ -1760,7 +1601,34 @@ public class ArtrobotController : MonoBehaviour {
         }
         else if (collision.gameObject.CompareTag("Chain"))
         {
-        //    Destroy(collision.gameObject);
+            //    Destroy(collision.gameObject);
+        }
+
+        if (collision.gameObject.layer == 13)
+        {
+            Debug.Log("Hit by enemy");
+
+            if (!GetComponent<PlayerHealthScript>().GetIsHitStunned())
+            {
+                string chainState = chain.GetComponent<ChainController>().GetState();
+                if (state.Equals(swinging) || state.Equals(chaining))
+                {
+                    Debug.Log("Starting fall off swing");
+                    FallOffSwing();
+
+
+
+                }
+                else
+                {
+                    KnockBack();
+                }
+           //     if (collision.gameObject.CompareTag("Laser") || collision.gameObject.CompareTag("CircleEnemy"))
+           //     {
+                    GetComponent<PlayerHealthScript>().DamageOrHealth(-1);
+                    GetComponent<WowController>().Impact();
+           //     }
+            }
         }
     }
     private void OnCollisionStay2D(Collision2D collision)
@@ -1771,7 +1639,7 @@ public class ArtrobotController : MonoBehaviour {
 
         string tag = collision.gameObject.tag;
         BoxCollider2D feetCollider = GetComponents<BoxCollider2D>()[0];
-        BoxCollider2D surfaceCollider = (BoxCollider2D)collision.collider;
+        Collider2D surfaceCollider = collision.collider;
 
         if (collision.gameObject.layer == 12 && feetCollider.bounds.min.y >= surfaceCollider.bounds.max.y 
             && GetState().Equals(falling))
@@ -1784,8 +1652,9 @@ public class ArtrobotController : MonoBehaviour {
         }
 
     }
-    private void OnCollisionExit2D(Collision2D collision)
+    public override void OnCollisionExit2D(Collision2D collision)
     {
+        base.OnCollisionExit2D(collision);
         //    Debug.Log("Left Collision");
         Debug.Log("Left Collision with " + collision.gameObject.name);
         //    Debug.Log("Layer = " + collision.gameObject.layer);
@@ -1833,26 +1702,7 @@ public class ArtrobotController : MonoBehaviour {
           //  isRidingPlatform = false;
             //SetState(standing);
         }
-        if (collision.gameObject.layer == 12 || collision.gameObject.layer == 11 && !justTurnedAround)
-        {
-            BoxCollider2D feetCollider = GetComponents<BoxCollider2D>()[0];
-            Debug.Log("Leaving Ground");
-            if (state.Equals(standing) && !substate.Equals(chaining) && collision.gameObject.layer == 12)
-            {
-
-                if (feetCollider.bounds.min.y >= collision.collider.bounds.max.y)
-                {
-                    Debug.Log("Setting state to fall");
-                    int layerCount;
-                    CollideMap.TryGetValue(layer, out layerCount);
-                    layerCount--;
-                    CollideMap.Remove(collisionName);
-                    CollideMap.Remove(layer);
-                    CollideMap.Add(layer, layerCount);
-                    SetFallState(false);
-                }
-            }
-        }
+      
 
     }
 

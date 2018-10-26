@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine; 
 
-public class BallEnemyScript : MonoBehaviour
+public class BallEnemyScript : Enemy
 {
 
     public GameObject player;
@@ -13,7 +13,6 @@ public class BallEnemyScript : MonoBehaviour
     private bool isChasingRight;
     private bool isChasingLeft;
     private bool hitState;
-    private bool isFading = false;
     private AudioSource audio;
     private AudioClip roll;
 
@@ -21,22 +20,19 @@ public class BallEnemyScript : MonoBehaviour
     private Vector2 circPattern;
     private Vector2 offset;
     private float chaseOffset;
-    private float health;
-    private float totalHealth;
+    
     private float space;
     private Quaternion lightOrigin;
-    private string state;
     private CircleCollider2D BallCollide;
     private BoxCollider2D PlatBox;
     private const string top = "top", right = "right", left = "left",
-        bottom = "bottom", cornering = "cornering", idle = "idle";
+        bottom = "bottom", cornering = "cornering";
     private string[] surfaceStates = { top, right, bottom, left };
     private int nextState;
     private float clockWise = 1;
     private float originalSpeed = 0.1f;
     private float speed;
     private Vector2 pivotPos = Vector2.zero;
-    private Color origColor;
     private float angleOffset = 0;
 
     private GameObject laserHead;
@@ -54,9 +50,9 @@ public class BallEnemyScript : MonoBehaviour
 
 
     // Use this for initialization
-    void Start()
+    public override void Start()
     {
-       
+        base.Start();
         playerDetected = false;
         isChasingRight = false;
         isChasingLeft = false;
@@ -69,7 +65,7 @@ public class BallEnemyScript : MonoBehaviour
         state = top;
         BallCollide = GetComponent<CircleCollider2D>();
         speed = originalSpeed;
-        origColor = GetComponent<Renderer>().material.color;
+        
         audio = GetComponent<AudioSource>();
         roll = (AudioClip)Resources.Load("SoundFX/corn-grain");
        
@@ -157,8 +153,10 @@ public class BallEnemyScript : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    public override void FixedUpdate()
     {
+        base.FixedUpdate();
+        Debug.Log("Ball State = " + state);
      //   Debug.Log("Audio Distance = " + audio.dis)
         //Debug.Log("State = " + state);
         //Debug.Log("Speed = " + speed);
@@ -171,7 +169,10 @@ public class BallEnemyScript : MonoBehaviour
         Vector3 botLeftCorner = Vector3.zero;
         Vector3 topLeftCorner = Vector3.zero;
 
-        SpawnLaser();
+        if (!(state.Equals(idle) || state.Equals(falling)))
+        {
+            SpawnLaser();
+        } 
 
         if (audio.clip.Equals(roll))
         {
@@ -346,7 +347,7 @@ public class BallEnemyScript : MonoBehaviour
             default:
                 break;
         }
-
+        rgdBdy.MovePosition(rgdBdy.position += localOffset);
 
      //   Debug.Log("Cage Enemy Position is: " + transform.position);
 
@@ -357,15 +358,6 @@ public class BallEnemyScript : MonoBehaviour
         Vector2 enemyPos = transform.position;
         space = center.x - playerPos.x;
   
-       
-        //if (Mathf.Abs(space) <= 8)
-        //{
-        //    IEnumerator coroutine = Follow(space);
-        //    if (!hitState)
-        //    {
-        //        StartCoroutine(coroutine);
-        //    }
-        //} 
     } 
     IEnumerator Follow (float space)
     {
@@ -392,11 +384,7 @@ public class BallEnemyScript : MonoBehaviour
             yield break;
         }
     }
-    
-  //  IEnumerator Idle
-  //  {
 
-  //  }
     private void Move(Vector3 dir, float clockWise)
     {
         // + 1 for right, -1 for left
@@ -414,18 +402,7 @@ public class BallEnemyScript : MonoBehaviour
 
     } 
 
-    private void TakeDamage(float damage)
-    {
-        Debug.Log("Taking Damage");
-        health -= damage;
-       
-
-
-        if (health <= 0)
-        {
-            Die();
-        }
-    }  
+    
 
     private void SpawnLaser()
     {
@@ -488,13 +465,8 @@ public class BallEnemyScript : MonoBehaviour
         }
         else
         {
-    //        Debug.Log("Nothing was hit by laser raycast");
-            //   Debug.Log("New Position = " + BallCollide.bounds.center +
-            //       (direction * 20));
             LaserMaster.transform.position = BallCollide.bounds.center +
                 (direction * 200);
-         //   LaserMaster.transform.position = new Vector2(0, 0);
-      //            Debug.Log("LaserMaster position = " + LaserMaster.transform.position);
             float lasLength = (LaserMaster.transform.position - BallCollide.bounds.center)
                 .magnitude;
             float bodyScale = ((lasLength - headLength) / bodyLength);
@@ -514,25 +486,42 @@ public class BallEnemyScript : MonoBehaviour
 
     }
 
-    private void SetState(string state)
+    public override void SetState(string state)
     {
-        if (!audio.isPlaying)
+        base.SetState(state);
+        if (!audio.isPlaying && !state.Equals(idle))
         {
             audio.clip = roll;
             audio.Play();
             audio.loop = true;
         }
-        this.state = state;
     }
 
-    private string GetState()
-    {
-        return state;
-    }
 
-    private void Die()
+    public override void Die()
     {
-        Destroy(gameObject, 0.5f);
+        base.Die();
+        //  Destroy(gameObject, 0.5f);
+        Debug.Log("Ball has died. RIP");
+        foreach (GameObject g in laserGroup)
+        {
+            Destroy(g);
+        }
+
+        SetFallState(false);
+        audio.Stop();
+        AudioClip clip = (AudioClip)Resources.Load("SoundFX/power_down"); 
+        if (clip == null)
+        {
+            Debug.Log("Power Down SoundFX cannot be found");
+        }
+        else
+        {
+            audio.clip = clip;
+        }
+        audio.loop = false;
+        audio.Play();
+        
     }
 
     private void ResetBall()
@@ -557,7 +546,7 @@ public class BallEnemyScript : MonoBehaviour
             nextState = ((int)clockWise + nextState) % 4;
             Debug.Log("Angle Offset = " + angleOffset);
         }
-        float count = 0;
+       // float count = 0;
 
         while (speed > 0)
         {
@@ -583,78 +572,8 @@ public class BallEnemyScript : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
 
         }
-
-        //Debug.Log("Rolling Back Now");
-        //hitState = true;
-        //int playerDirection = 0;
-        //if (space > 0)
-        //{
-        //    playerDirection = 1;
-        //}
-        //else
-        //{
-        //    playerDirection = -1;
-        //}
-
-        //for (float i = 0; i < 60; i ++)
-        //{
-        //    transform.position = new Vector2(transform.position.x + 0.03f * playerDirection * power, transform.position.y);
-        //    transform.RotateAround(GetComponent<Collider2D>().bounds.center, Vector3.forward * -playerDirection, Time.deltaTime * 1000);
-        //    yield return null;
-        //}
-        //hitState = false;
     }
-    IEnumerator DamageFade()
-    {
-        Debug.Log("Starting Flash");
-        //Color fade = new Color(255f, 0f, 0f);
-        //Color origColor = GetComponent<Renderer>().material.color;
-        //GetComponent<Renderer>().material.color = redFlash;
-        isFading = true;
-        float fade = 1.0f;
-        GetComponent<Renderer>().material.color = origColor;
-        bool fadingDown = true;
-        
-
-        for (float i = 0; i < 60; i ++)
-        {
-            Color c = GetComponent<Renderer>().material.color;
-            if (fadingDown)
-            {
-                if (fade > 0)
-                {
-                    fade -= 0.08f;
-                    c.g = fade;
-                    c.b = fade;
-                    GetComponent<Renderer>().material.color = c;
-                    Debug.Log("Color is " + c);
-                }
-                else
-                {
-                    fadingDown = false;
-                }
-            }
-            else
-            {
-                if (fade <= 1)
-                {
-                    fade += 0.08f;
-                    c.g = fade;
-                    c.b = fade;
-                    GetComponent<Renderer>().material.color = c;
-                    Debug.Log("Color is " + c);
-                }
-                else
-                {
-                    fadingDown = true ;
-                }
-            }
-            yield return null;
-
-        }
-        GetComponent<Renderer>().material.color = origColor;
-        isFading = false;
-    }
+   
 
     IEnumerator LaserFlash()
     {
@@ -695,61 +614,96 @@ public class BallEnemyScript : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    public override void OnTriggerEnter2D(Collider2D collision)
     {
-  //      Debug.Log("Enemy Bullet collision detected");
-        if (collision.gameObject.CompareTag("Bullet"))
+        //      Debug.Log("Enemy Bullet collision detected");
+
+        if (collision.IsTouching(GetComponents<Collider2D>()[1]))
         {
-            //        Debug.Log("Bullet-Bullet collision detected");
-            //     GetComponent<BallEnemyAudioScript>().SwordAttack();
-            AudioClip impact = (AudioClip)Resources.Load("SoundFX/" +
-                "zapsplat_impact_metal_thin_001_10694");
-            audio.clip = impact;
-            audio.Play();
-            audio.loop = false;
-            StopCoroutine("RollBack");
-            StopCoroutine("DamageFade");
-            StartCoroutine("RollBack");
-            StartCoroutine("DamageFade");
             
-            TakeDamage(1);
-            //Destroy(gameObject);         
-            Destroy(collision.gameObject);
-        }
-        if (collision.gameObject.CompareTag("Sword"))
-        {
-            Debug.Log("Sword strike detected");
-            GetComponent<BallEnemyAudioScript>().SwordAttack();
-            StopCoroutine("RollBack");
-            StopCoroutine("DamageFade");
-            StartCoroutine("RollBack");
-            StartCoroutine("DamageFade");
-            
-            TakeDamage(1);
-            // Destroy(gameObject);
-        }
-        if (collision.tag.Equals("SurfaceShape"))
-        {
-            Debug.Log("Ball colliding with platform suface");
-            if (PlatBox == null)
+            if (collision.gameObject.tag.Equals("SurfaceShape"))
             {
-                PlatBox = collision.gameObject.GetComponent<BoxCollider2D>();
+                Debug.Log("Ball colliding with platform suface");
+                if (PlatBox == null)
+                {
+                    PlatBox = collision.gameObject.GetComponent<BoxCollider2D>();
+                }
             }
+            if (collision.gameObject.CompareTag("Bullet") && !isFading)
+            {
+                //        Debug.Log("Bullet-Bullet collision detected");
+                //     GetComponent<BallEnemyAudioScript>().SwordAttack();
+                AudioClip impact = (AudioClip)Resources.Load("SoundFX/" +
+                    "zapsplat_impact_metal_thin_001_10694");
+                audio.clip = impact;
+                audio.Play();
+                audio.loop = false;
+                StopCoroutine("RollBack");
+                StopCoroutine("DamageFade");
+                StartCoroutine("RollBack");
+                StartCoroutine("DamageFade");
+
+                TakeDamage(1);
+                //Destroy(gameObject);         
+                Destroy(collision.gameObject);
+            }
+            else if (collision.gameObject.CompareTag("Sword"))
+            {
+                Debug.Log("Sword strike detected");
+                GetComponent<BallEnemyAudioScript>().SwordAttack();
+                StopCoroutine("RollBack");
+                StopCoroutine("DamageFade");
+                StartCoroutine("RollBack");
+                StartCoroutine("DamageFade");
+
+                TakeDamage(1);
+                // Destroy(gameObject);
+            }
+
+
         }
+
     }
 
     private void OnTriggerStay2D(Collider2D collision)
     {
-    //    Debug.Log("Colliding with " + collision.name);
-        
+        //    Debug.Log("Colliding with " + collision.name);
+       
+
     }
 
-    private void OnCollisionExit(Collision collision)
+    public override void OnCollisionEnter2D(Collision2D collision)
     {
+      //  base.OnCollisionEnter2D(collision);
+
+        Debug.Log("Colliding with " + collision.gameObject);
+        
+
         if (collision.gameObject.layer == 12)
         {
-            Debug.Log("Ball leaving collision with platform surface");
-            PlatBox = null;
+            if (GetState().Equals(falling))
+            {
+                SetState(idle);
+                foreach (Collider2D c in GetComponents<Collider2D>())
+                {
+                    c.enabled = false;
+                }
+            }
         }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        Debug.Log("Ball is currently colliding with " + collision.gameObject.name);
+       
+    }
+
+    public override void OnCollisionExit2D(Collision2D collision)
+    {
+        //if (collision.gameObject.layer == 12)
+        //{
+        //    Debug.Log("Ball leaving collision with platform surface");
+        //    PlatBox = null;
+        //}
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChainController : MonoBehaviour {
+public class ChainController : Character {
 
     public GameObject nextLink;
     public GameObject ChainHead;
@@ -22,15 +22,13 @@ public class ChainController : MonoBehaviour {
     private bool isChaining;
     private Vector2 aimDir;
     private bool wasClimbing;
-    private const string idle = "idle", shooting = "shooting", retracting = "retracting",
+    private const string shooting = "shooting", retracting = "retracting",
         pulling = "pulling", swinging = "swinging";
-    private string state;
     private Vector2 LastPos;
     private Vector2 PlatformSpeed;
     private int FixedCount = 0;
     private Vector2 LastPlayerPos = Vector2.zero;
     private Vector2 headPos = Vector2.zero;
-    private Rigidbody2D rgdBdy;
     private List<float> lastPosList;
     private float startSwingTime;
     private float currSwingTime;
@@ -74,7 +72,7 @@ public class ChainController : MonoBehaviour {
         }
     }
 
-    private void FixedUpdate()
+    public override void FixedUpdate()
     {
    //     rgdBdy.MovePosition(playerOffset);
         if (linkCount == 13)
@@ -245,7 +243,7 @@ public class ChainController : MonoBehaviour {
         
         
     }
-    private void LateUpdate()
+    public override void LateUpdate()
     {
         LastPos = transform.position;
     }
@@ -314,7 +312,7 @@ public class ChainController : MonoBehaviour {
         
         if (playerPhysics == null)
         {
-            playerPhysics = player.GetComponent<ArtrobotController>().playerPhysics;
+            playerPhysics = player.GetComponent<ArtrobotController>().characPhysics;
 
         }
         playerPhysics.StopPhysics();
@@ -475,15 +473,6 @@ public class ChainController : MonoBehaviour {
         this.PlatformSpeed = PlatformSpeed;
     }
 
-    public void SetState(string state)
-    {
-        this.state = state;
-    }
-
-    public string GetState()
-    {
-        return state;
-    }
 
     public void SetOffset(Vector2 playerOffset)
     {

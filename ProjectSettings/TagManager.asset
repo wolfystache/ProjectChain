@@ -21,6 +21,7 @@ TagManager:
   - Laser
   - Climbable
   - SurfaceShape
+  - SpiderEnemy
   layers:
   - Default
   - TransparentFX

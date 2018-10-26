@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4759699555735546}
   - component: {fileID: 212944555445441136}
   - component: {fileID: 58424600128237954}
+  - component: {fileID: 58022080427057880}
   - component: {fileID: 114482782264360284}
   - component: {fileID: 50893168155994690}
   - component: {fileID: 114480815874320968}
@@ -69,7 +70,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1122459383341634}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.63, y: 15.17, z: 0}
+  m_LocalPosition: {x: -0.644, y: 15.153, z: 0}
   m_LocalScale: {x: 1.0328181, y: 1.0328181, z: 2.0656362}
   m_Children:
   - {fileID: 4544219087816254}
@@ -83,20 +84,20 @@ Rigidbody2D:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1122459383341634}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
---- !u!58 &58424600128237954
+--- !u!58 &58022080427057880
 CircleCollider2D:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -106,6 +107,21 @@ CircleCollider2D:
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0.01050265, y: -0.0009607676}
+  serializedVersion: 2
+  m_Radius: 0.6373758
+--- !u!58 &58424600128237954
+CircleCollider2D:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1122459383341634}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0.010502653, y: -0.00096076756}
@@ -230,6 +246,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 851700bfe82c7a540942797251cbb6eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  state: 
+  substate: idle
+  prevPos: []
+  isFacingRight: 0
+  justTurnedAround: 0
+  rgdBdy: {fileID: 0}
+  localOffset: {x: 0, y: 0}
   player: {fileID: 0}
 --- !u!212 &212133286178574956
 SpriteRenderer:
