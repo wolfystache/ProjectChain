@@ -35,6 +35,7 @@ public class ChainDestroyer : MonoBehaviour {
     {
         this.chainList = chainList;
         mostRecentChain = (GameObject)chainList.Peek();
+        Debug.Log("Chain Size = " + chainList.ToArray().Length);
         Debug.Log("Most Recent Chain tag is " + mostRecentChain.name);
     }
 

@@ -5,9 +5,16 @@ using UnityEngine;
 public class AimController : MonoBehaviour {
 
     public Sprite[] spriteList;
+    public static AimController player;
 
-	// Use this for initialization
-	void Start () {
+
+
+    private void Awake()
+    {
+        player = this;
+    }
+    // Use this for initialization
+    void Start () {
 		
 	}
 	

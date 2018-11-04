@@ -8,7 +8,6 @@ public class ChainController : Character {
     public GameObject ChainHead;
     public Transform ChainHeadSpawn;
     public Transform ClimbingAimSpawn;
-    public GameObject player;
     public GameObject ChainDestroyer;
 
     float speed;
@@ -41,11 +40,16 @@ public class ChainController : Character {
     private AudioSource audio;
     private Vector2 playerOffset = Vector2.zero;
 
-    private Physics playerPhysics;
+    private Physics playerPhysics; 
+
+    private bool isPullingClimbable = false;
+
+    public static ChainController chain;
 
     private static int linkCount;
 
     void Start () {
+        chain = this;
         isReturning = false;
         SetState(idle);
         chainList = new Stack();
@@ -92,9 +96,9 @@ public class ChainController : Character {
      
         //         Debug.Log("AimDir = " + aimDir);
         Vector2 pos = transform.position;
-        Vector2 playerPos = player.transform.position;
+        Vector2 playerPos = ArtrobotController.player.transform.position;
 
-        bool isFacingRight = player.GetComponent<ArtrobotController>().IsFacingRight();
+        bool isFacingRight = ArtrobotController.player.GetComponent<ArtrobotController>().IsFacingRight();
 
        
 
@@ -113,12 +117,24 @@ public class ChainController : Character {
                 break;
             case pulling:
                 Vector2 playerOffset = speed * aimDir;
-                player.GetComponent<ArtrobotController>().AddOffset(playerOffset);
+                ArtrobotController.player.AddOffset(playerOffset);
+                if (!isPullingClimbable)
+                {
+                    float chainPlayerDistance = (transform.position - ArtrobotController.player.transform.position)
+                        .magnitude;
+
+                    if (chainPlayerDistance < 2.5f)
+                    {
+                        Swing();
+                    }
+
+                }
+
                 break;
             case swinging:
                 currSwingTime = Time.realtimeSinceStartup - startSwingTime;
                 //           Debug.Log("HeadPos = " + headPos);
-                Vector2 input = player.GetComponent<ArtrobotController>().GetInput();
+                Vector2 input = ArtrobotController.player.GetInput();
 
                 int facingRightMult; 
 
@@ -131,7 +147,7 @@ public class ChainController : Character {
                     facingRightMult = -1;
                 }
 
-                int HorizDirection = player.GetComponent<ArtrobotController>().IsTravelingHoriz();
+                int HorizDirection = ArtrobotController.player.IsTravelingHoriz();
          //       Debug.Log("HorizDirection = " + HorizDirection);
              //   Debug.Log("Input = " + input.x);
                 if ((HorizDirection == 1 && input.x > 0) || 
@@ -171,13 +187,16 @@ public class ChainController : Character {
                         audio.Play();
                     }
                 }
-                
-        //       Debug.Log("HeadPos = " + headPos);
-         //       Debug.Log("Theta = " + theta);
-               // transform.RotateAround(transform.position, Vector3.forward, theta - lastAngle);
-                player.transform.RotateAround(transform.position, Vector3.forward, theta - lastAngle);
+
+                //       Debug.Log("HeadPos = " + headPos);
+                //       Debug.Log("Theta = " + theta);
+                // transform.RotateAround(transform.position, Vector3.forward, theta - lastAngle);
+                ArtrobotController.player.transform.RotateAround
+                    (transform.position, Vector3.forward, theta - lastAngle);
+                transform.RotateAround
+                    (transform.position, Vector3.forward, theta - lastAngle);
                 //      Debug.Log("lastAngle = " + lastAngle);
-         //       Debug.Log("Rotating by " + (theta - lastAngle));
+                //       Debug.Log("Rotating by " + (theta - lastAngle));
                 lastAngle = theta;
                 
                 break;
@@ -190,7 +209,8 @@ public class ChainController : Character {
 
         if (transform.parent == null && !GetState().Equals(idle))
         {
-   //         Debug.Log("playerOffset = " + playerOffset.x + "," + playerOffset.y);
+            //         Debug.Log("playerOffset = " + playerOffset.x + "," + playerOffset.y);
+          //  transform.position += new Vector3(offset.x, offset.y);
             rgdBdy.MovePosition(rgdBdy.position + offset);
         }
         else
@@ -218,18 +238,6 @@ public class ChainController : Character {
             }
          
 
-            if (isStuck)
-            {
-                //       player.transform.position = playerPos + (speed * aimDir); 
-           //     Debug.Log("Isreturning = " + isReturning);
-
-            //    Vector2 playerOffset = speed * aimDir;
-                //player.transform.localPosition += new Vector3(playerOffset.x, playerOffset.y);
-                // player.GetComponent<ArtrobotController>().AddOffset(playerOffset);
-           //     Debug.Log("PlayerOffset = " + playerOffset);
-
-
-            }
        //     offset += PlatformSpeed;
             float diff = transform.position.y - LastPos.y;
  
@@ -249,7 +257,7 @@ public class ChainController : Character {
     }
     public void ShootChain()
     {
-        transform.parent = player.transform;
+        transform.parent = ArtrobotController.player.transform;
         Debug.Log("Shooting Chain");
      //   player.GetComponent<SpriteRenderer>().enabled = false;
         //    isChaining = true;
@@ -272,13 +280,13 @@ public class ChainController : Character {
 
          speed = 0.2f;
         //   player.GetComponent<ArtrobotController>().GetAimAngle();
-          aimDir = player.GetComponent<ArtrobotController>().GetAimDir();
+          aimDir = ArtrobotController.player.GetComponent<ArtrobotController>().GetAimDir();
    //     aimDir = new Vector2(1, 0);
         Debug.Log("AimDir = " + aimDir.x + "," + aimDir.y); 
         // speed = 7.3f;
 
         //    Debug.Log(player.GetComponent<ArtrobotController>().GetClimbing());
-        if (player.GetComponent<ArtrobotController>().GetClimbing())
+        if (ArtrobotController.player.GetComponent<ArtrobotController>().GetClimbing())
         {
             Debug.Log("Rotating Chain Head");
             spawn = ClimbingAimSpawn;
@@ -294,7 +302,7 @@ public class ChainController : Character {
         Vector3 offset = head - transform.position;
         transform.position = head;
         link.transform.position -= offset;
-        LastPlayerPos = player.GetComponent<Rigidbody2D>().position;
+        LastPlayerPos = ArtrobotController.player.GetComponent<Rigidbody2D>().position;
 
         chainList.Push(link);
         anim = link.GetComponent<Animator>();
@@ -305,18 +313,19 @@ public class ChainController : Character {
 
 
     }
-    public void StruckChainable(GameObject ledge)
+    public void StruckChainable(GameObject ledge, bool isClimable)
     {
+        isPullingClimbable = isClimable;
         Debug.Log("Struck Chainable");
         SetState(pulling);
         
         if (playerPhysics == null)
         {
-            playerPhysics = player.GetComponent<ArtrobotController>().characPhysics;
+            playerPhysics = ArtrobotController.player.characPhysics;
 
         }
         playerPhysics.StopPhysics();
-        player.GetComponent<ArtrobotController>().SetState("standing");
+        ArtrobotController.player.SetState("standing");
         StopCoroutine("AudioSequence");
         AudioClip ChainStrike = (AudioClip) Resources.Load("SoundFX/axe-impact-3");
         if (ChainStrike!= null)
@@ -334,22 +343,22 @@ public class ChainController : Character {
             Debug.Log("Couldn't find Audio Clip");
         }
         transform.parent = null;
-        player.transform.parent = null;
-      //  player.transform.parent = ledge.transform;
-        player.GetComponent<ArtrobotController>().SetIsRiding(true);
+        ArtrobotController.player.transform.parent = null;
+        //  player.transform.parent = ledge.transform;
+        ArtrobotController.player.SetIsRiding(true);
         ledge.GetComponent<ChainableController>().MovePlayer(true);
         //   isStuck = true;
          
        // Swing();
        // SetState(swinging);
      
-        if (player.GetComponent<ArtrobotController>().GetClimbing())
+        if (ArtrobotController.player.GetClimbing())
         {
 
-            player.GetComponent<AimController>().localTurnAround();
+            AimController.player.localTurnAround();
             wasClimbing = true;
         }
-        player.GetComponent<ArtrobotController>().SetGravity(false);
+        ArtrobotController.player.SetGravity(false);
         //   isReturning = true; 
         ChainDestroyer.GetComponent<Collider2D>().enabled = true;
         GameObject furthest = (GameObject) chainList.Pop();
@@ -387,11 +396,13 @@ public class ChainController : Character {
 
         
         ChainDestroyer.GetComponent<Collider2D>().enabled = true;
-        player.GetComponent<ArtrobotController>().SetState("swinging");
+        ArtrobotController.player.SetState("swinging");
         //   Debug.Log("Chain Group position = " + transform.position);   
 
+        Vector2 pos = transform.position;
         transform.parent = null;
-        transform.parent = player.transform;
+   //     transform.parent = ArtrobotController.player.transform;
+        transform.position = pos;
         Vector2 head = GetComponentsInChildren<Transform>()[1].position;
         //      Debug.Log("Head name = " + GetComponentsInChildren<BoxCollider2D>()[1].name);
         Transform furtLinkPos = transform.GetChild(transform.childCount - 1).transform;
@@ -399,12 +410,13 @@ public class ChainController : Character {
    //     furtLinkPos.GetComponent<Animator>().SetFloat("Speed", speed * 1000000f);
 
         Debug.Log("Name = " + furtLinkPos.name);
-     //   furtLinkPos.GetComponent<Animator>().SetFloat("Speed", 0);
+        //   furtLinkPos.GetComponent<Animator>().SetFloat("Speed", 0);
+
         
         length = ((new Vector3(head.x, head.y)) - furtLinkPos.position).magnitude;
         
         lastAngle = -((Mathf.Atan(aimDir.x / aimDir.y) * 57.2958f));
-        if (!player.GetComponent<ArtrobotController>().IsFacingRight())
+        if (!ArtrobotController.player.IsFacingRight())
         {
             lastAngle *= 1;
         }
@@ -416,6 +428,7 @@ public class ChainController : Character {
     {
         Debug.Log("Furthest chain: " + transform.localPosition.x);
         GameObject furtLinkPos = transform.GetChild(transform.childCount - 1).gameObject;
+        Debug.Log("furthLinkPos = " + furtLinkPos.name);
         if (GetState().Equals(swinging))
         {
             float animSpeed = (int)(speed * 10.0f);
@@ -437,8 +450,14 @@ public class ChainController : Character {
         }
         else
         {
-            Destroy(furtLinkPos);
-            chainList.Pop();
+            if (chainList.Peek().Equals(furtLinkPos))
+            {
+                chainList.Pop();
+            }
+            ChainDestroyer.GetComponent<ChainDestroyer>().StopAllCoroutines();
+
+            Destroy(furtLinkPos); 
+            
 
         }
         SetState(retracting);
@@ -482,11 +501,9 @@ public class ChainController : Character {
     public void SwingOff()
     {
         Debug.Log("Length = " + length);
-        
-        bool isFacingRight = player.GetComponent<ArtrobotController>()
-            .IsFacingRight();
-        int horizTravelDir = player.GetComponent<ArtrobotController>()
-            .IsTravelingHoriz();
+        transform.parent = ArtrobotController.player.transform;
+        bool isFacingRight = ArtrobotController.player.IsFacingRight();
+        int horizTravelDir = ArtrobotController.player.IsTravelingHoriz();
         float dismountAngle = 0;
         float thetaRad = theta / (180 / Mathf.PI);
         float maxAngleRad = maxAngle / (180 / Mathf.PI);
@@ -494,7 +511,7 @@ public class ChainController : Character {
         //    float dismountVel = Mathf.Abs(maxAngle * Mathf.Sqrt((-Physics.grav / length))
         //       * Mathf.Sin(Mathf.Sqrt(((-Physics.grav) / length) * currSwingTime))) * 0.2f;
 
-        float dismountVel = Mathf.Sqrt(2 * -Physics.grav * length *
+        float dismountVel = Mathf.Sqrt(2 * -Physics.gravConstant * length *
             (Mathf.Cos(Mathf.Abs(thetaRad)) - Mathf.Cos(Mathf.Abs(maxAngleRad)))) * 1.0f;
         Debug.Log("Theta = " + Mathf.Abs(theta));
         Debug.Log("MaxAngle = " + (Mathf.Abs(maxAngle)));
@@ -526,8 +543,8 @@ public class ChainController : Character {
             
         Debug.Log("DismountVel and Angle = " + dismountVel + " & "
             + dismountAngle);
-        playerPhysics.StartPhysics(currTime, player.transform.position, dismountVel,
-            dismountAngle);
+        playerPhysics.StartPhysics(currTime, ArtrobotController.player.transform.position, dismountVel,
+            dismountAngle, 1);
     }
     
 
@@ -537,9 +554,9 @@ public class ChainController : Character {
     } 
     public void ChangeSwingAngle()
     {
-        Vector2 newAimDir = new Vector2(transform.position.x - player.transform.position.x,
-            transform.position.y - player.transform.position.y);
-        newAimDir /= (transform.position - player.transform.position).magnitude;
+        Vector2 newAimDir = new Vector2(transform.position.x - ArtrobotController.player.transform.position.x,
+            transform.position.y - ArtrobotController.player.transform.position.y);
+        newAimDir /= (transform.position - ArtrobotController.player.transform.position).magnitude;
         aimDir = newAimDir;
     }
 
@@ -558,8 +575,8 @@ public class ChainController : Character {
         audio.loop = false;
         if (state.Equals(retracting))
         {
-          //  player.GetComponent<ArtrobotController>().SetState("standing");
-            player.GetComponent<ArtrobotController>().AimReset();
+            //  player.GetComponent<ArtrobotController>().SetState("standing");
+            ArtrobotController.player.AimReset();
         }
         if (wasClimbing)
         {
@@ -572,10 +589,10 @@ public class ChainController : Character {
       //  GetComponent<Transform>().localPosition = new Vector2(0, 0f);
     //    Debug.Log(GetComponent<Transform>().position);
         isReturning = false;
-        anim = player.GetComponent<Animator>();
+        anim = ArtrobotController.player.GetComponent<Animator>();
         anim.SetBool("Chain", false);
         //  player.GetComponent<ArtrobotController>().SetChaining(false);
-        player.GetComponentInChildren<AimArmController>().resetAim();
+        ArtrobotController.player.GetComponentInChildren<AimArmController>().resetAim();
         ChainDestroyer.GetComponent<Collider2D>().enabled = false;
         isChaining = false;
 
@@ -604,7 +621,7 @@ public class ChainController : Character {
       //      Debug.Log("chain done");
             if (!GetState().Equals(shooting)) { break; }
             linkCount++;
-            Vector3 playerDiff = player.GetComponent<Rigidbody2D>().position - LastPlayerPos;
+            Vector3 playerDiff = ArtrobotController.player.GetComponent<Rigidbody2D>().position - LastPlayerPos;
   //          Debug.Log("LinkSpawnPosition = " + linkSpawn.position);
             GameObject link = (GameObject)Instantiate(nextLink, linkSpawn.position, linkSpawn.rotation);
             link.name = linkCount.ToString();
@@ -613,7 +630,7 @@ public class ChainController : Character {
             animLength = anim.GetCurrentAnimatorStateInfo(0).length;
             linkSpawn = link.transform.GetChild(0).transform;
             link.transform.parent = gameObject.transform;
-            LastPlayerPos = player.GetComponent<Rigidbody2D>().position;
+            LastPlayerPos = ArtrobotController.player.GetComponent<Rigidbody2D>().position;
             
         }
 

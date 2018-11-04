@@ -9,8 +9,15 @@ public class WowController : MonoBehaviour {
     public AudioSource audio;
     public AudioSource impact;
 
-	// Use this for initialization
-	void Start () {
+    public static WowController player;
+
+    // Use this for initialization
+
+    private void Awake()
+    {
+        player = this;
+    }
+    void Start () {
         //    audio = GetComponent<AudioSource>();
         //   audio.clip = wow0; 
        

@@ -37,7 +37,7 @@ public class AimArmController : MonoBehaviour {
 
      //   Vector2 aimDir = GetComponentInParent<ArtrobotController>().GetRadialInput();
         Vector2 aimDir = GetComponentInParent<ArtrobotController>().GetAimDir();
-        //  Debug.Log("AimDir = (" + aimDir.x + ", " + aimDir.y + ")");
+        Debug.Log("AimDir = (" + aimDir.x + ", " + aimDir.y + ")");
     //    Debug.Log(aimDir.x + "," + aimDir.y);
         if (desiredAngle == 0)
         {

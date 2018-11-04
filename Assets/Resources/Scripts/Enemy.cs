@@ -9,16 +9,57 @@ public class Enemy : Character {
     public float health;
     public float totalHealth;
     public bool stillAlive = true;
+    protected float detectionRadius;
+    protected bool isFollowing = false;
+    protected int damageCaused;
+    Collider2D rgdCollider;
+    Collider2D playerTrigger;
+    protected AudioSource audio;
 
     // Use this for initialization
     public virtual void Start () {
         origColor = GetComponent<Renderer>().material.color;
+        Collider2D[] playerCollider = new Collider2D[ArtrobotController.artTrans.
+            GetComponent<Rigidbody2D>().attachedColliderCount];
+        ArtrobotController.artTrans.
+            GetComponent<Rigidbody2D>().GetAttachedColliders(playerCollider);
+        rgdCollider = GetComponents<Collider2D>()[0];
+        playerTrigger = ArtrobotController.player.GetComponents<Collider2D>()[0];
+        Debug.Log("Collider count = " + ArtrobotController.artTrans.GetComponent<Rigidbody2D>().attachedColliderCount);
+
+        foreach (Collider2D c in ArtrobotController.artTrans.GetComponents< Collider2D > ())
+        {
+
+                Debug.Log("Ignoring Collision with collider " + c.name);
+                Physics2D.IgnoreCollision(rgdCollider, c, true);
+                
+                Debug.Log("rgdCollider name = " + rgdCollider.name);
+                
+
+        }
+        int num = 0;
+        foreach (Collider2D c in ArtrobotController.artTrans.GetComponents<Collider2D>())
+        {
+            
+            Debug.Log("Ignore Collision = " + num + " " + Physics2D.GetIgnoreCollision(rgdCollider, c));
+            Debug.Log("rgdCollider is trigger = " + c.isTrigger);
+            num++;
+        }
+            audio = GetComponent<AudioSource>();
+
+    }
+
+    protected override void Awake()
+    {
+        base.Awake();
     }
 	
 	// Update is called once per frame
-	void Update () {
-		
-	}
+	public override void FixedUpdate () {
+        base.FixedUpdate();
+        Debug.Log("Ignore Collision = " + Physics2D.GetIgnoreCollision(rgdCollider,
+            playerTrigger));
+    }
 
     public void TakeDamage(float damage)
     {
@@ -31,12 +72,34 @@ public class Enemy : Character {
         {
             Die();
         }
+        else
+        {
+            AudioClip impact = (AudioClip)Resources.Load("SoundFX/" +
+                   "zapsplat_impact_metal_thin_001_10694");
+            audio.clip = impact;
+            audio.Play();
+            audio.loop = false;
+        }
     } 
 
     public virtual void Die()
     {
         stillAlive = false;
         StopAllCoroutines();
+
+        audio.Stop();
+        AudioClip clip = (AudioClip)Resources.Load("SoundFX/power_down");
+        if (clip == null)
+        {
+            Debug.Log("Power Down SoundFX cannot be found");
+        }
+        else
+        {
+            audio.clip = clip;
+            audio.loop = false;
+            audio.Play();
+        }
+        
 
         StartCoroutine("FadeToGrey");
     }
@@ -124,15 +187,65 @@ public class Enemy : Character {
     // Enemy Base Class colliders 
 
     public virtual void OnTriggerEnter2D(Collider2D collision)
+
     {
-        if (collision.gameObject.CompareTag("Bullet") && !isFading)
+        Debug.Log("Enemy has collided with " + collision.name);
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            if (!PlayerHealthScript.player.GetIsHitStunned())
+            {
+
+                if (ArtrobotController.player.GetSubState().Equals("sword"))
+                {
+                    ArtrobotController.player.SetSubState("none");
+                    ArtrobotController.player.GetComponentInChildren<SwordController>().Reset();
+                    ArtrobotController.player.anim.SetBool("sword", false);
+                }
+
+
+                PlayerHealthScript.player.DamageOrHealth(damageCaused);
+                if (ArtrobotController.player.state.Equals("swinging") ||
+                    ArtrobotController.player.state.Equals("chaining"))
+                {
+                    Debug.Log("Starting fall off swing");
+                    ArtrobotController.player.FallOffSwing();
+                }
+                else
+                {
+                    ArtrobotController.player.KnockBack();
+                }
+                WowController.player.Impact();
+            }
+
+        }
+        
+        else if (collision.gameObject.CompareTag("Bullet") && !isFading)
         {
             StartCoroutine("DamageFade");
 
-            TakeDamage(1);
+            TakeDamage(0.25f);
             //Destroy(gameObject);         
             Destroy(collision.gameObject);
-        }
+        }  
+        else if (collision.gameObject.CompareTag("Sword") && !isFading)
+            {
+                StartCoroutine("DamageFade");
+
+                TakeDamage(1.0f);
+            }
+       
+
+        
+    }
+    public void OnTriggerStay2D(Collider2D collision)
+    {
+        Debug.Log("Enemy has collided with " + collision.name);
+    }
+
+    public override void OnCollisionEnter2D(Collision2D collision)
+    {
+        base.OnCollisionEnter2D(collision);
+
     }
 
 

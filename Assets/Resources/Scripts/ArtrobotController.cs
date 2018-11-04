@@ -35,6 +35,7 @@ public class ArtrobotController : Character {
     private bool gravityOn;
     private float radius;
     private float lastAngle;
+    private float speed; 
 
     private Vector2 leftStickInput;
     private Vector2 rightStickInput;
@@ -43,10 +44,10 @@ public class ArtrobotController : Character {
 
     private Vector2 input;
     private Vector2 aimDir;
-    private const string running = "running", climbing = "climbing",
+    private const string climbing = "climbing",
         chaining = "chaining", aiming = "aiming", climbingAiming = "climbingAiming",
-        paused = "paused",
-        swinging = "swinging";
+        paused = "paused", swinging = "swinging", sword = "sword", swingingOff = "swingingOff", 
+        climbingLedge = "climbingLedge";
     private bool isTravelingUp;
     private bool isTravelingDown;
     private bool startFall;
@@ -64,6 +65,9 @@ public class ArtrobotController : Character {
     private Vector2 offset;
     private GameObject ridingPlatform;
     private BoxCollider2D climbCollide;
+    public static Transform artTrans;
+
+    private const float MAX_SPEED = 1.0F;
 
     
     private List<Vector2> prevTriggVal;
@@ -72,12 +76,15 @@ public class ArtrobotController : Character {
 
     public Physics playerPhysics;
 
-    Animator anim;
+    public static ArtrobotController player;
+
+    public Animator anim;
+    
 
     // Use this for initialization
     void Start()
     {
-
+        
         //  audio = GetComponent<AudioSource>();  
         isAimUp = false;
         maxSpeed = 7.5f;
@@ -118,6 +125,14 @@ public class ArtrobotController : Character {
         playerPhysics = new Physics(name);
 
         CollideMap = new Dictionary<string, int>();
+        
+
+    }
+    protected override void Awake()
+    {
+        base.Awake();
+        player = this;
+        artTrans = transform;
 
     }
 
@@ -197,11 +212,34 @@ public class ArtrobotController : Character {
         {
             case standing:
                 move = input.x;
+                if (Mathf.Abs(move) > 0.05f && substate.Equals("none"))
+                {
+                    SetState(running);
+                    int dir = (int) (move / Mathf.Abs(move));
+                    Debug.Log("move = " + move);
+                    speed = 0.01f * dir;
+                    Debug.Log("speed = " + speed);
+                    Debug.Log("Starting to run");
+                }
+                break;
+            case running: 
+                if (Mathf.Abs(input.x) <= 0.01f)
+                {
+                    SetState(standing);
+                }
+                move = input.x;
                 break;
             case chaining:
                 move = 0;
                 break;
             case climbing:
+                break;
+            case climbingLedge:
+                if (anim.GetCurrentAnimatorStateInfo(0).IsName("LedgeClimb") 
+                    && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+                {
+                    ClimbLedge(GetTopLedge());
+                }
                 break;
             //case aiming:
             //    move = 0;
@@ -252,7 +290,12 @@ public class ArtrobotController : Character {
                 if (GetTopLedge() != null)
                 {
                     Debug.Log("Climbing ledge");
-                    ClimbLedge(GetTopLedge());
+                    SetState(climbingLedge);
+                    float top = GetTopLedge().GetComponent<Collider2D>().bounds.max.y - 0.63f;
+                    transform.position = new Vector2(transform.position.x, top);
+                    anim.SetBool("isClimbing", false);
+                    anim.SetBool("ledgeClimb", true);
+                    
                     pullUpZone = false;
                 }
             }
@@ -293,16 +336,16 @@ public class ArtrobotController : Character {
 
 
         }
-
-        if (!anim.GetCurrentAnimatorStateInfo(0).IsTag("SwordAttack"))
+        
+        if (Input.GetButtonDown("Sword"))
         {
-            //   Debug.Log("Sword attack has stopped");
-            anim.SetBool("sword", false);
-            if (Input.GetButtonDown("Sword"))
+            if (!anim.GetCurrentAnimatorStateInfo(0).IsTag("SwordAttack"))
             {
                 Sword();
+                
             }
         }
+        
 
 
       
@@ -314,23 +357,10 @@ public class ArtrobotController : Character {
             //  if (!(state.Equals(aiming) || (state.Equals(climbingAiming))))
             Debug.Log(state);
             
-            if (state.Equals(swinging) || state.Equals(chaining))
+            if (state.Equals(swinging) || substate.Equals(chaining))
             {
 
                 FallOffSwing();
-                
-       //         chain.GetComponent<ChainController>().ChangeSwingAngle();
-       //         float speed = chain.GetComponent<ChainController>().GetSpeed() * 6;            
-       //         chain.GetComponent<ChainController>().SetSpeed(speed);
-       //         if (state.Equals(swinging))
-       //         {
-       //             chain.GetComponent<ChainController>().SwingOff();
-       //         }
-       //         chain.GetComponent<ChainController>().ChainReturn();
-       //         StartCoroutine("RotateAfterRetraction");
-               
-       ////         transform.rotation = Quaternion.identity;
-       //         SetFallState(true);
                
             }
             else
@@ -379,21 +409,26 @@ public class ArtrobotController : Character {
         }
         if (Input.GetButtonDown("Start"))
         {
+            Debug.Log("Paused State = " + pausedState);
+            if (GetState().Equals(paused))
+            {
+                Time.timeScale = 1;
+                SetState(pausedState);
+            }
+            else
+            {
+                pausedState = state;
+                Time.timeScale = 0;
+                SetState(paused);
+            }
+        }
+        if (Input.GetButtonDown("Select"))
+        {
             Debug.Log("State = " + GetState());
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            //if (!state.Equals(paused))
-            //{
-            //    pausedState = GetState();
-            //    SetState(paused);
-            //    Time.timeScale = 0;
-
-            //}
-            //else
-            //{
-            //    Time.timeScale = 1;
-            //    SetState(pausedState);
-            //}
         }
+
+      
      //   Debug.Log("Right Stick Magnitude = " + rightStickInput.magnitude);
         if (( rightStickInput.magnitude >= 0.999f || Mathf.Abs(rightStickInput.x) == 1 ||
             Mathf.Abs(rightStickInput.y) == 1) &&
@@ -401,62 +436,48 @@ public class ArtrobotController : Character {
             !(GetSubState().Equals(aiming) || GetSubState().Equals(chaining) ||
             GetState().Equals(swinging)))
         {
-
+            aimDir = GetRadialInput();
             anim.SetBool("isAiming", true);
             if (GetState().Equals(climbing))
             {
 
             //    SetState(climbingAiming);
                 SetSubState(aiming);
-                float lastAngle = 180;
-                aimDir = new Vector2(-1, 0);
+                lastAngle = 180;
                 if (!isFacingRight)
                 {
-                    aimDir = new Vector2(1, 0);
                     lastAngle = 0;
                 }
-                GetComponentInChildren<AimArmController>().setLastAngle(lastAngle);
                 GetComponentInChildren<AimArmController>().setSprite(true);
-                Debug.Log("Calling Aim from Artrobot");
-                
-                GetComponentInChildren<AimDotController>().StartSights();
-
 
             }
             else
             {
-
-            //    float lastAngle = 0;
+                lastAngle = 0;
                 if (!isFacingRight)
                 {
-            //        lastAngle = 180;
+                    lastAngle = 180;
                 }
-
-             //   Debug.Log("aimDir = " + aimDir);
-
-                GetComponentInChildren<AimArmController>().setLastAngle(lastAngle);
-
-                //    Debug.Log("Looking up");
-                //  if (isF)
                 isAimUp = true;
-                //      SetState(aiming);
-                SetSubState(aiming);
                 GetComponentInChildren<AimArmController>().setSprite(false);
-                GetComponentInChildren<AimArmController>().aim(0);
-                Debug.Log("Spawning Sights");
-                GetComponentInChildren<AimDotController>().StopSights();
-                GetComponentInChildren<AimDotController>().StartSights();
+
+
             }
 
+            SetSubState(aiming);
+            GetComponentInChildren<AimArmController>().setLastAngle(lastAngle);
+            GetComponentInChildren<AimArmController>().aim(0);
 
-            //Debug.Log("Moving Camera now");
-            //float rightStickVal = Input.GetAxis("RightVertical");
-            //Camera.main.GetComponent<CameraController>().LookUp(rightStickVal);
+            Debug.Log("Calling Aim from Artrobot");
+
+            GetComponentInChildren<AimDotController>().StopSights();
+            Debug.Log("AimDir before starting sights = " + aimDir);
+            GetComponentInChildren<AimDotController>().StartSights();
         } 
         else if (rightStickInput.magnitude < 0.99f)
         {
             
-            if (!(GetSubState().Equals(chaining) || GetState().Equals(swinging)))
+            if ((GetSubState().Equals(aiming) && !GetState().Equals(swinging)))
             {
        //         Debug.Log("RightStick back to DZ. Resetting Aim");
                 AimReset();
@@ -498,6 +519,33 @@ public class ArtrobotController : Character {
         //Debug.Log("SubState = " + substate);
         switch (state)
         {
+            case running:
+                if (Mathf.Abs(move) > 0.01)
+                {
+                    Debug.Log("Speed = " + speed);
+                    
+                    if (Mathf.Abs(speed) >= MAX_SPEED)
+                    {
+                        speed = MAX_SPEED * move;
+                    }
+
+                    else
+                    {
+                        speed = speed * 1.5f;
+
+                        if (Mathf.Abs(speed) >= MAX_SPEED)
+                        {
+                            speed = MAX_SPEED * move;
+                        }
+                        Debug.Log("Speed = " + speed);
+                    }
+                }
+                else
+                {
+                    SetState(standing);
+                }
+                break;
+
             case falling:
                // currPos = transform.position;
                 
@@ -522,6 +570,7 @@ public class ArtrobotController : Character {
                 localOffset += characPhysics.Gravity(transform.position);
                 if (characPhysics.StartedFalling())
                 {
+                    Debug.Log("Character has started falling");
                     SetFallState(true);
                 }
 
@@ -539,13 +588,6 @@ public class ArtrobotController : Character {
                 
                 BoxCollider2D box = GetComponents<BoxCollider2D>()[3];
 
-
-            //    if (ridingPlatform != null)
-            //    {
-              //      Debug.Log("Riding Platform name = " + ridingPlatform.name);
-                   // BoxCollider2D platformCol = ridingPlatform.GetComponent<BoxCollider2D>();
-             //       Debug.Log("TopBox Max = " + topBox.bounds.max.y +
-             //           "\nPlatform Top = " + platformCol.bounds.max.y);
                     if ((box.bounds.max.y <= climbCollide.bounds.max.y || vertMove < 0) &&
                         (box.bounds.min.y >= climbCollide.bounds.min.y || vertMove > 0))
                     {
@@ -554,12 +596,6 @@ public class ArtrobotController : Character {
                         localOffset += new Vector2(0, vertMove * 0.07f);
                        //        );
                     }
-                    //else
-                    //{
-                    //    fixedPos = rgdBdy.position;
-                    //}
-           //     }
-
                 
                
                 anim.SetFloat("climbSpeed", Mathf.Pow(Mathf.Abs(vertMove), 0.2f));
@@ -606,6 +642,7 @@ public class ArtrobotController : Character {
                 break;
             
         }
+        Debug.Log("Substate = " + substate);
         switch (substate)
         {
             case aiming:
@@ -614,10 +651,45 @@ public class ArtrobotController : Character {
             case chaining:
                 move = 0;
                 break;
+            case swingingOff:
+                move *= 0.5f;
+                break;
+            case sword:
+                move = 0;
+                if (anim.GetCurrentAnimatorStateInfo(0).IsName("SwordAttack")) {
+
+                    float normTime = anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+
+                    if (normTime >= 0.375f && normTime < 0.75f)
+                    {
+                        //     Debug.Log("Enabling HitBox");
+                        Debug.Log("In Attack Phase");
+                        GetComponentInChildren<SwordController>().HitBox();
+                    } 
+
+                    else if (normTime >= 0.75f && normTime < 1.0f)
+                    {
+                        Debug.Log("In recovery phase");
+                        GetComponentInChildren<SwordController>().Reset();
+                    }
+                
+                    else if (normTime >= 1.0f) {
+                        Debug.Log("Done with sword animation");
+                        
+                        anim.SetBool("sword", false);
+                        SetSubState("none");
+                    }
+                    else
+                    {
+                        Debug.Log("In Anticipation phase");
+                    }
+                }
+                break;
             default:
                 break;
         }
     //    Debug.Log("move = " + move);
+        if (state.Equals(running)) { move = speed; };
         localOffset += new Vector2((move * 10f * Time.deltaTime), 0);
         fixedPos += localOffset;
         chain.GetComponent<ChainController>().SetOffset(localOffset);
@@ -640,6 +712,16 @@ public class ArtrobotController : Character {
         {
             //   GetComponent<AimController>().turnAround();
             Debug.Log("Turning Around");
+            if (isFacingRight)
+            {
+                aimDir = new Vector2(-1, 0);
+            }
+            else
+            {
+                aimDir = new Vector2(1, 0);
+            }
+
+
             TurnAround(1);
         }
     }
@@ -772,13 +854,13 @@ public class ArtrobotController : Character {
         SetState(jumping);
         float jumpTime = Time.realtimeSinceStartup;
         //  playerPhysics.StartPhysics(jumpTime, transform.position, 10.5f, 90.0f);
-        characPhysics.StartPhysics(jumpTime, transform.position, 10.5f, 90.0f);
-        yield return new WaitForSeconds(0.3f);
-        if (GetState().Equals(jumping))
-        {
-            Debug.Log("End of Jump");
-            SetFallState(true);
-        }
+        characPhysics.StartPhysics(jumpTime, transform.position, 10.5f, 90.0f, 1);
+        //yield return new WaitForSeconds(0.3f);
+        //if (GetState().Equals(jumping))
+        //{
+        //    Debug.Log("End of Jump");
+        // //   SetFallState(true);
+        //}
      
       //  GetComponent<Rigidbody2D>().velocity = new Vector2(rigidbody2DVel.x, 0.0f);
       //  Debug.Log("Velocity = " + rigidbody2DVel);
@@ -803,7 +885,7 @@ public class ArtrobotController : Character {
         }
         var bullet = (GameObject)Instantiate(bulletPreFab,
             spawn.position, spawn.rotation);
-                bullet.GetComponent<Rigidbody2D>().velocity =  aimDir * 50;
+                bullet.GetComponent<Rigidbody2D>().velocity =  aimDir * 100;
             
          
             Debug.Log("Bullet's position is " + bullet.GetComponent<Rigidbody2D>().velocity);
@@ -861,17 +943,20 @@ public class ArtrobotController : Character {
        // GetComponent<Rigidbody2D>().velocity = new Vector2(0, 0);
       //  GetComponent<WowController>().Woosh();
         anim.SetBool("sword", true);
-        GetComponentInChildren<SwordController>().HitBox();
-        if (Mathf.Abs(move) > 0.001f)
-        {
-            anim.SetBool("isMoving", true);
-        }
-        else
-        {
-            anim.SetBool("isMoving", false);
-        }
+        SetState(standing);
+        SetSubState(sword);
+        //if (Mathf.Abs(move) > 0.001f)
+        //{
+        //    anim.SetBool("isMoving", true);
+        //}
+        //else
+        //{
+        //    anim.SetBool("isMoving", false);
+        //}
 
-    }
+    } 
+
+
     public bool IsFacingRight()
     {
         return isFacingRight;
@@ -924,6 +1009,15 @@ public class ArtrobotController : Character {
     public override void SetState(string state)
     {
         Debug.Log("Setting State from " + GetState() + " to " + state);
+        if (!state.Equals(running))
+        {
+            Debug.Log("Setting speed to 0");
+            speed = 0;
+        }
+        if (GetState().Equals(falling) && !state.Equals(falling) && GetSubState().Equals(swingingOff)) {
+            Debug.Log("Setting subState to none");
+            SetSubState("none");
+        }
         if (GetState().Equals(climbing) || state.Equals(climbing))
         {
             BoxCollider2D[] boxes = GetComponents<BoxCollider2D>();
@@ -945,11 +1039,19 @@ public class ArtrobotController : Character {
             }
         }
         this.state = state; 
+        
+
+    
     }
 
     public void SetSubState(string substate)
     {
         this.substate = substate;
+    } 
+
+    public override void TurnAround(int collider)
+    {
+        base.TurnAround(collider);
     }
 
     public string GetSubState()
@@ -1235,38 +1337,44 @@ public class ArtrobotController : Character {
         
         
         Vector2 top;
+        //   float topY = topLedge.GetComponents<Collider2D>()[0].bounds.max.y + 0.773263f;
+        float topY = topLedge.GetComponents<Collider2D>()[0].bounds.max.y + 0.8f;
         if (isFacingRight) 
         {
             Bounds ledgeBnds = topLedge.GetComponents<Collider2D>()[0].bounds;
             //  top = new Vector2(ledgeBnds.min.x + 0.69f, ledgeBnds.max.y + 1.25926275f);
-            top = new Vector2(ledgeBnds.center.x , ledgeBnds.max.y + 0.9f);
+            top = new Vector2(ledgeBnds.center.x , topY);
 
         }
         else
         {
             Bounds ledgeBnds = topLedge.GetComponents<Collider2D>()[1].bounds;
 
-            top = new Vector2(ledgeBnds.center.x, ledgeBnds.max.y + 0.9f);
+            top = new Vector2(ledgeBnds.center.x, topY);
 
         }
         transform.parent = null;
         Rigidbody2D rgdBdy = GetComponent<Rigidbody2D>();
         //  rgdBdy.MovePosition(top);
         transform.position = top;
-        anim.SetBool("isClimbing", false);
-        SetGravity(true);
+        anim.SetBool("ledgeClimb", false);
+      //  SetGravity(true);
         anim.enabled = true;
         isClimbing = false;
-        SetFallState(false);
+        SetState(standing);
+       // SetFallState(false);
 
     }
 
     public void AimReset()
     {
-  //      Debug.Log("Resetting Aim");
+        Debug.Log("Resetting Aim");
         GetComponentInChildren<AimDotController>().StopSights();
         GetComponentInChildren<AimArmController>().resetAim();
-        SetSubState("none");
+        if (!substate.Equals(swingingOff))
+        {
+            SetSubState("none");
+        }
 
           if (GetState().Equals(aiming))
         {
@@ -1370,7 +1478,7 @@ public class ArtrobotController : Character {
         }
 
         //  playerPhysics.StartPhysics(currTime, transform.position, knockVelocity, knockAngle);
-        characPhysics.StartPhysics(currTime, transform.position, knockVelocity, knockAngle);
+        characPhysics.StartPhysics(currTime, transform.position, knockVelocity, knockAngle, 1);
 
         //  SetFallState(true);
     }
@@ -1421,10 +1529,14 @@ public class ArtrobotController : Character {
     public void FallOffSwing()
     {
         chain.GetComponent<ChainController>().ChangeSwingAngle();
-       
+
+        bool hasPhysics = false;
         if (state.Equals(swinging))
         {
+            SetSubState(swingingOff);
             chain.GetComponent<ChainController>().SwingOff();
+            hasPhysics = true;
+
             
         }
         chain.GetComponent<ChainController>().ChainReturn();
@@ -1434,7 +1546,8 @@ public class ArtrobotController : Character {
         StartCoroutine("RotateAfterRetraction");
 
         //         transform.rotation = Quaternion.identity;
-        SetFallState(true);
+        
+        SetFallState(hasPhysics);
     }
 
     IEnumerator ShootPose()
@@ -1533,12 +1646,12 @@ public class ArtrobotController : Character {
 
         BoxCollider2D feetCollider = GetComponents<BoxCollider2D>()[0];
 
-        Debug.Log("Max Player Collider 0 = " + GetComponents<BoxCollider2D>()[0].bounds.max.x);
-        Debug.Log("Max Player Collider 1 = " + GetComponents<BoxCollider2D>()[1].bounds.max.x);
-        Debug.Log("Max Player Collider 2 = " + GetComponents<BoxCollider2D>()[2].bounds.max.x);
-        Debug.Log("Max Player Collider 3 = " + GetComponents<BoxCollider2D>()[3].bounds.max.x);
+        //Debug.Log("Max Player Collider 0 = " + GetComponents<BoxCollider2D>()[0].bounds.max.x);
+        //Debug.Log("Max Player Collider 1 = " + GetComponents<BoxCollider2D>()[1].bounds.max.x);
+        //Debug.Log("Max Player Collider 2 = " + GetComponents<BoxCollider2D>()[2].bounds.max.x);
+        //Debug.Log("Max Player Collider 3 = " + GetComponents<BoxCollider2D>()[3].bounds.max.x);
 
-        Debug.Log("Min Surface Collider = " + collision.collider.bounds.min.x);
+     //   Debug.Log("Min Surface Collider = " + collision.collider.bounds.min.x);
 
         Collider2D collider = collision.collider;
         if (collision.gameObject.layer == 12 || collision.gameObject.layer == 11)
@@ -1575,27 +1688,16 @@ public class ArtrobotController : Character {
                         CollideMap.Remove(collisionName);
                         CollideMap.Remove(layer);
                         CollideMap.Add(layer, layerCount);
-                        //     SetFallState(false);
+                             SetFallState(false);
                     }
                 }
             }
         }
-        //Debug.Log("Arthur is touching something");
-        //    Debug.Log(collision.gameObject.tag);
-        //if (collision.gameObject.CompareTag("Chainable"))
-        //{
-        //    isRidingPlatform = true;
-        //}
+
         if (collision.gameObject.CompareTag("EnemyBullet"))
         {
             Debug.Log("Taking Damage!!");
             Destroy(collision.gameObject);
-            GetComponent<PlayerHealthScript>().DamageOrHealth(-1);
-            GetComponent<WowController>().Impact();
-        }
-        else if (collision.gameObject.CompareTag("CircleEnemy"))
-        {
-            Debug.Log("Taking Damage!!");
             GetComponent<PlayerHealthScript>().DamageOrHealth(-1);
             GetComponent<WowController>().Impact();
         }
@@ -1604,32 +1706,33 @@ public class ArtrobotController : Character {
             //    Destroy(collision.gameObject);
         }
 
-        if (collision.gameObject.layer == 13)
-        {
-            Debug.Log("Hit by enemy");
+        //if (collision.gameObject.layer == 13)
+        //{
+        //    Debug.Log("Hit by enemy " + collision.gameObject.name);
+        //    Debug.Log("Enemy is trigger = " + collision.collider.isTrigger);
 
-            if (!GetComponent<PlayerHealthScript>().GetIsHitStunned())
-            {
-                string chainState = chain.GetComponent<ChainController>().GetState();
-                if (state.Equals(swinging) || state.Equals(chaining))
-                {
-                    Debug.Log("Starting fall off swing");
-                    FallOffSwing();
+        //    if (!GetComponent<PlayerHealthScript>().GetIsHitStunned())
+        //    {
+        //        string chainState = chain.GetComponent<ChainController>().GetState();
+        //        if (state.Equals(swinging) || state.Equals(chaining))
+        //        {
+        //            Debug.Log("Starting fall off swing");
+        //            FallOffSwing();
 
 
 
-                }
-                else
-                {
-                    KnockBack();
-                }
-           //     if (collision.gameObject.CompareTag("Laser") || collision.gameObject.CompareTag("CircleEnemy"))
-           //     {
-                    GetComponent<PlayerHealthScript>().DamageOrHealth(-1);
-                    GetComponent<WowController>().Impact();
-           //     }
-            }
-        }
+        //        }
+        //        else
+        //        {
+        //            KnockBack();
+        //        }
+        //   //     if (collision.gameObject.CompareTag("Laser") || collision.gameObject.CompareTag("CircleEnemy"))
+        //   //     {
+        //            GetComponent<PlayerHealthScript>().DamageOrHealth(-1);
+        //            GetComponent<WowController>().Impact();
+        //   //     }
+        //    }
+        //}
     }
     private void OnCollisionStay2D(Collision2D collision)
     {
@@ -1712,7 +1815,7 @@ public class ArtrobotController : Character {
         if (collision.gameObject.CompareTag("TopOfLedge"))
         {
 
-                    Debug.Log("Pull Up Zone detected");
+            Debug.Log("Pull Up Zone detected");
             //     if (GetState().Equals(climbing) || GetState().Equals(chaining))
             if (GetState().Equals(climbing) || GetSubState().Equals(chaining))
             {
@@ -1735,7 +1838,7 @@ public class ArtrobotController : Character {
             }
             if (GetState().Equals(standing) || GetState().Equals(falling))
             {
-        //        GetState().Equals(standing);
+                //        GetState().Equals(standing);
                 //      Debug.Log("Standing on top of surface");
                 if (collision.gameObject.transform.parent.transform.parent != null)
                 {
@@ -1743,34 +1846,39 @@ public class ArtrobotController : Character {
                 }
             }
         }
-        else if (collision.gameObject.layer == 13)
-        {
-            Debug.Log("Hit by enemy");
+        //else if (collision.gameObject.layer == 13)
+        //{
+        //    Debug.Log("Hit by enemy " + collision.gameObject.name);
+            //    Debug.Log("Enemy is trigger = " + collision.collider.isTrigger);
 
-            if (!GetComponent<PlayerHealthScript>().GetIsHitStunned())
-            {
-                string chainState = chain.GetComponent<ChainController>().GetState();
-                if (state.Equals(swinging) || state.Equals(chaining))
-                {
-                    Debug.Log("Starting fall off swing");
-                    FallOffSwing();
-             
-             
+        //    if (!GetComponent<PlayerHealthScript>().GetIsHitStunned())
+        //    {
+        //        //if (GetSubState().Equals(sword))
+        //        //{
+        //        //    SetSubState("none");
+        //        //    GetComponentInChildren<SwordController>().Reset();
+        //        //    anim.SetBool("sword", false);
+        //        //}
+        //        string chainState = chain.GetComponent<ChainController>().GetState();
+        //        if (state.Equals(swinging) || state.Equals(chaining))
+        //        {
+        //            Debug.Log("Starting fall off swing");
+        //            FallOffSwing();
+        //       }
+        //        else
+        //        {
+        //            KnockBack();
+        //        } 
+        //        //     if (collision.gameObject.CompareTag("Laser") || collision.gameObject.CompareTag("CircleEnemy"))
+        //        //     {
+        //        GetComponent<PlayerHealthScript>().DamageOrHealth(-1);
+        //        GetComponent<WowController>().Impact();
+        //        //     }
+        //    }
+        //    //}
+        //    GameObject collider = collision.gameObject;
 
-                }
-                else
-                {
-                    KnockBack();
-                }
-                if (collision.CompareTag("Laser") || collision.CompareTag("CircleEnemy"))
-                {
-                    GetComponent<PlayerHealthScript>().DamageOrHealth(-1);
-                    GetComponent<WowController>().Impact();
-                }
-            }
-        }
         //}
-        GameObject collider = collision.gameObject; 
 
     }
 

@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Character : MonoBehaviour {
 
-    public const string standing = "standing", falling = "falling", idle = "idle", jumping = "jumping";
+    public const string standing = "standing", falling = "falling", idle = "idle", jumping = "jumping", 
+        running = "running";
     public string state;
     public string substate = idle;
     public Physics characPhysics;
@@ -16,7 +17,7 @@ public class Character : MonoBehaviour {
 
 
     // Use this for initialization
-    void Awake () {
+    protected virtual void Awake () {
 
         characPhysics = new Physics(name);
         substate = idle; 
@@ -27,8 +28,13 @@ public class Character : MonoBehaviour {
     }
 
     public virtual void FixedUpdate()
-    {
-        localOffset = new Vector2(); 
+    { 
+
+        localOffset = new Vector2();
+
+        
+
+        
 
         switch (state)
         {
@@ -130,7 +136,7 @@ public class Character : MonoBehaviour {
         isFacingRight = !isFacingRight;
     }
 
-    public void TurnAround(int colliderChoice)
+    public virtual void TurnAround(int colliderChoice)
     {
         Debug.Log("Turning around");
         StartCoroutine("JustTurned");
@@ -166,7 +172,7 @@ public class Character : MonoBehaviour {
         if (!hasPhysics)
         {
             float fallTime = Time.realtimeSinceStartup;
-            characPhysics.StartPhysics(fallTime, transform.position, 0, 0);
+            characPhysics.StartPhysics(fallTime, transform.position, 0, 0, 1);
 
         }
         
@@ -196,7 +202,7 @@ public class Character : MonoBehaviour {
         {
             Collider2D feetCollider = GetComponents<Collider2D>()[0];
             Debug.Log("Leaving Ground");
-            if ((state.Equals(standing) || state.Equals(idle)) && !substate.Equals("chaining") 
+            if ((state.Equals(standing) || state.Equals(idle) || state.Equals(running)) && !substate.Equals("chaining") 
                 && collision.gameObject.layer == 12)
             {
 

@@ -34,7 +34,7 @@ TagManager:
   - Projectiles
   - Player
   - Chain
-  - Chainable
+  - Climbable
   - Ground
   - Enemy
   - 

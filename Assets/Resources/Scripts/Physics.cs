@@ -14,8 +14,16 @@ public class Physics {
     private Vector2 lastDisp;
     private Vector2 lastOffset;
     private string name = "NotAssigned";
+    private float currTime = 0;
+    private float fallCount = 0;
+    private bool reachedMaxVel = false;
+    float maxVel = 0;
 
-    public static float grav = 3 * - 9.81f;
+    public static float gravConstant = 3 * -9.81f;
+
+    public float grav = gravConstant;
+
+    
 
     public Physics (string name)
     {
@@ -25,7 +33,7 @@ public class Physics {
 
 
     public void StartPhysics(float fallTime, Vector2 startPosition, float initialVelocity, 
-        float velAngle)
+        float velAngle, float gravScale)
     {
         Debug.Log("Starting Physics calculations");
         this.fallTime = fallTime;
@@ -36,34 +44,47 @@ public class Physics {
         this.initialVelocity = initialVelocity;
         velAngle /= (180 / Mathf.PI);
         this.velAngle = velAngle;
+        grav = gravConstant * gravScale;
+        currTime = fallCount = 0;
+        startedFalling = false;
+        reachedMaxVel = false;
+        maxVel = 0;
+
     }
     public void StopPhysics()
     {
         fallTime = initialVelocity = velAngle = 0;
         startPosition = Vector2.zero;
         isJumpingOrFalling = false;
+        startedFalling = false;
+        currTime = 0;
         
     }
 
 
     public Vector2 Gravity(Vector2 position)
     {
-        
+
         float initXVel = Mathf.Cos(velAngle) * initialVelocity;
         float initYVel = Mathf.Sin(velAngle) * initialVelocity;
 
-        startedFalling = false;
-
         Debug.Log("initXVel = " + initXVel);
-        float currTime = Time.realtimeSinceStartup - fallTime;
+        Debug.Log("currTime = " + currTime);
+      //  float currTime = Time.realtimeSinceStartup - fallTime;
         float xPos = 0;
-        float maxVel = 0;
-        bool reachedMaxVel = false;
-        currTime = Time.realtimeSinceStartup - fallTime;
-        if (currTime > 0.7f && !reachedMaxVel)
+        
+        
+        //  currTime = Time.realtimeSinceStartup - fallTime;
+        currTime += Time.fixedDeltaTime;
+        if (startedFalling) { fallCount += Time.fixedDeltaTime; }
+        
+        Debug.Log("Real Time = " + (Time.realtimeSinceStartup - fallTime));
+        if (fallCount > 1.0f && !reachedMaxVel)
         {
             //     Debug.Log("Approximately 0.7f");
-            currTime = Time.realtimeSinceStartup - fallTime;
+          //  currTime += Time.fixedDeltaTime;
+
+         //   currTime = Time.realtimeSinceStartup - fallTime;
             //    maxVel = (initYVel * currTime + 0.5f * grav * Mathf.Pow(currTime, 2.0f) + startPosition.y)
             //        - position.y;
             maxVel = (initYVel * currTime + 0.5f * grav * Mathf.Pow(currTime, 2.0f) - lastDisp.y);
@@ -92,13 +113,22 @@ public class Physics {
 
         lastDisp = new Vector2(xDisp, yDisp);
         lastOffset = offset;
-        if (currTime < 0.7f)
+        if (name.Equals("Artrobot1"))
         {
-            return offset;
-        }
+            if (!reachedMaxVel)
+            {
+                Debug.Log("Not reached terminal vel yet");
+                return offset;
+            }
+            else
+            {
+                Debug.Log("Reached max vel of " + maxVel);
+                return new Vector2(offset.x, maxVel);
+            }
+        } 
         else
         {
-            return new Vector2(offset.x, maxVel);
+            return offset;
         }
     } 
 

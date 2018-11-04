@@ -5,29 +5,39 @@ using UnityEngine;
 public class ChainScript : MonoBehaviour {
 
     private GameObject player;
+    private bool isPulling;
+    private Vector2 collisionPoint = new Vector2();
+
     // Use this for initialization
     void Awake()
     {
-        player = GameObject.Find("Artrobot 1");
+       
     }
     // Update is called once per frame
-    void FixedUpdate () {
 
-
-    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         GameObject collider = collision.gameObject;
         if (transform.parent.GetComponent<ChainController>().GetState().Equals("shooting"))
         {
+
+
             if (collider.CompareTag("Chainable"))
             {
 
                 GameObject ChainGroup = transform.parent.gameObject;
-                //     Debug.Log("Name = " + collider.transform.parent.gameObject.name);
-                ChainGroup.GetComponent<ChainController>().StruckChainable(collider.transform.parent.gameObject);
+                //     Debug.Log("Name = " + collider.transform.parent.gameObject.name); 
+                Collider2D collide = GetComponent<Collider2D>();
+                bool isClimbable = false;
+                LayerMask mask = Physics2D.GetLayerCollisionMask(11);
+                if (collide.IsTouchingLayers(mask))
+                {
+                    isClimbable = true;
+                }
 
+                ChainGroup.GetComponent<ChainController>().StruckChainable(collider.transform.parent.gameObject,
+                    isClimbable); 
 
                 Debug.Log("Chain Detected on Chainable Surface");
             }
@@ -46,11 +56,12 @@ public class ChainScript : MonoBehaviour {
             }
         } 
 
+        // Fall off if swing hits enemy
         if (collider.layer == 13)
         {
             if (transform.parent.GetComponent<ChainController>().GetState().Equals("swinging"))
             {
-                player.GetComponent<ArtrobotController>().FallOffSwing();
+                ArtrobotController.player.FallOffSwing();
             }
         }
     }
@@ -61,15 +72,5 @@ public class ChainScript : MonoBehaviour {
     }
 
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        //Debug.Log("Chain Head has collided with something");
-        //if (!collision.gameObject.CompareTag("SurfaceShape"))
-        //{
-        //    GameObject ChainGroup = transform.parent.gameObject;
-        //    //     Debug.Log("Name = " + collider.transform.parent.gameObject.name);
-        //    ChainGroup.GetComponent<ChainController>().ChainReturn();
-        //}
-    }
 
 }

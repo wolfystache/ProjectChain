@@ -13,6 +13,13 @@ public class PlayerHealthScript : MonoBehaviour {
     int [] heartList;
     bool isHitStunned;
 
+    public static PlayerHealthScript player;
+
+    private void Awake()
+    {
+        player = this;
+    }
+
 
     // Use this for initialization
     void Start () {

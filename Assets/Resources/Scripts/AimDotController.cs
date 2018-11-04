@@ -16,11 +16,28 @@ public class AimDotController : MonoBehaviour {
     private Vector3 nextPosition;
     private bool wasColliding = false;
     private Vector3 originalPosition;
+    private float ballLength;
+    private GameObject aimBall;
+    private int aimBallCount;
+
+    private const float AIM_SPACE = 0.25f;
+    private const int TOTAL_BALL_COUNT = 60;
 
     // Use this for initialization
     void Start () {
         dotCount = 0;
         originalPosition = transform.localPosition;
+        aimBall = (GameObject)Resources.Load("Sprites/Prefabs/AimBall"); 
+
+        if (aimBall != null)
+        {
+            ballLength = aimBall.GetComponent<BoxCollider2D>().bounds.size.x;
+        }
+        else
+        {
+            Debug.Log("Cannot find aimBall object");
+        }
+
 	}
 	
 	// Update is called once per frame
@@ -31,71 +48,85 @@ public class AimDotController : MonoBehaviour {
             //Debug.Log("Arm Position = " + transform.parent.position);
             //Debug.Log("Dot Position = " + transform.position);
             //Debug.Log("Dot Rotation = " + transform.rotation);
-        }
-        int numChild = transform.childCount;
-        //     Debug.Log("stillAiming = " + stillAiming);
-    //    Debug.Log("DotCount = " + dotCount);
-    //    Debug.Log("Position = " + transform.position);
-   //     Debug.Log("WasColliding = " + wasColliding);
-        LayerMask mask = LayerMask.GetMask("Ground", "Enemy");
-        Vector2 aimDir = player.GetComponent<ArtrobotController>().GetAimDir();
-        if (numChild > 0)
-        {
+
+            int numChild = transform.childCount;
+            //     Debug.Log("stillAiming = " + stillAiming);
+            //    Debug.Log("DotCount = " + dotCount);
+            //    Debug.Log("Position = " + transform.position);
+            //     Debug.Log("WasColliding = " + wasColliding);
+            LayerMask mask = LayerMask.GetMask("Ground", "Enemy");
+            Vector2 aimDir = player.GetComponent<ArtrobotController>().GetAimDir();
+            //    if (numChild > 0)
+            //   {
             //  Debug.DrawRay(transform.position, aimDir, Color.black);
-            Vector3 furthSightPos = transform.GetChild(numChild - 1).position;
-            float length = (furthSightPos - transform.position)
-                .magnitude;
+            //Vector3 furthSightPos = transform.GetChild(numChild - 1).position;
+            //float length = (furthSightPos - transform.position)
+            //    .magnitude;
             //       Debug.Log("Length = " + length);
-            RaycastHit2D []hit = Physics2D.RaycastAll(
-                    transform.position, aimDir, length, mask);
-            if (hit.Length != 0) {
-         //       Debug.Log("Hit size = " + hit.Length);
+            RaycastHit2D[] hit = Physics2D.RaycastAll(
+                    transform.position, aimDir, 100, mask);
+            if (hit.Length != 0)
+            {
+                //       Debug.Log("Hit size = " + hit.Length);
                 if (hit[0])
                 {
-                    foreach (RaycastHit2D h in hit)
-                    {
-             //           Debug.Log("h pos = " + h.point);
-                    }
-       //             Debug.Log("Raycast hit a collider");
-                    Ray ray = new Ray(new Vector3(transform.position.x, transform.position.y,
-                        0), aimDir);
-
-
-                    //Debug.Log("Ray Distance = " +
-                    //    hit[0].distance);
-                    //   Debug.Log(hit.rigidbody.name);
                     Vector3 point = hit[0].point;
-                    //Debug.Log("Point pos = " + point);
-                    //Debug.Log("Furthest Ball = " + furthSightPos);
-                    //Debug.Log("Point/Furthest ball = " +
-                    //        (point - furthSightPos).magnitude);
-                    if (!wasColliding)
-                    {
-                        wasColliding = true;
-                        stillDrawing = false;                     
+                    float aimDistance = (point - transform.position).magnitude;
 
-                    }
-                    if ((point - furthSightPos).magnitude > 3)
-                    {
+                    Debug.Log("aimDistance = " + aimDistance);
 
-                        Debug.Log("Large Distance resetting sights");
-                        StopSights();
-                        StartSights();
+                    Debug.Log("Point = " + point);
+
+                    aimBallCount = Mathf.FloorToInt((aimDistance + AIM_SPACE) / (ballLength + AIM_SPACE));
+                    Debug.Log("AimBallCount = " + aimBallCount);
+                    if (aimBallCount > TOTAL_BALL_COUNT)
+                    {
+                        aimBallCount = TOTAL_BALL_COUNT;
                     }
+
+
+
+                    //if (!wasColliding)
+                    //{
+                    //    wasColliding = true;
+                    //    stillDrawing = false;                     
+
+                    //}
+                    //if ((point - furthSightPos).magnitude > 3)
+                    //{
+
+                    //    Debug.Log("Large Distance resetting sights");
+                    //    StopSights();
+                    //    StartSights();
+                    //}
                 }
+                
 
             }
             else
             {
-                if (wasColliding)
-                {
-                    Debug.Log("Redrawing balls, no longer Raycasting");
-                    stillDrawing = true;
-                    wasColliding = false;
-                    
-                }
+                Debug.Log("Not colliding with anything");
+                aimBallCount = TOTAL_BALL_COUNT;
+
             }
+            StopSights();
+            StartSights();
         }
+
+
+            //     }
+            //else
+            //{
+
+            //    if (wasColliding)
+            //    {
+            //        Debug.Log("Redrawing balls, no longer Raycasting");
+            //        stillDrawing = true;
+            //        wasColliding = false;
+
+            //    }
+            //}
+        
 	}
 
     public void StartSights()
@@ -136,7 +167,7 @@ public class AimDotController : MonoBehaviour {
             nextPosition = transform.position;
         
   //      yield return new WaitForSeconds(0.1f);
-        while (dotCount < 60 && stillAiming)
+        while (dotCount < aimBallCount)
         { 
             if (!stillDrawing)
             {
@@ -144,7 +175,7 @@ public class AimDotController : MonoBehaviour {
             }
         //    player.GetComponent<ArtrobotController>().GetAimAngle();
             Vector2 aimDir = player.GetComponent<ArtrobotController>().GetAimDir();
-            Debug.Log("AimDir = " + aimDir);
+        //    Debug.Log("AimDir = " + aimDir);
 
 
             Quaternion rotate;
@@ -158,10 +189,10 @@ public class AimDotController : MonoBehaviour {
             {
                 rotate = transform.parent.rotation;
             }
-            aimDir *= 0.25f;
+            aimDir *= AIM_SPACE;
             Vector3 nextDotPosition = new Vector3(nextPosition.x + aimDir.x, 
                 nextPosition.y + aimDir.y);
-            GameObject dot = Instantiate(AimDot, nextDotPosition, transform.rotation);
+            GameObject dot = Instantiate(aimBall, nextDotPosition, transform.rotation);
             dot.GetComponent<SpriteRenderer>().enabled = false;
             dot.transform.parent = transform;
             dot.GetComponent<SpriteRenderer>().enabled = true;
@@ -173,13 +204,15 @@ public class AimDotController : MonoBehaviour {
                 //Debug.Log("Dot Rotation = " + dot.transform.rotation);
             }
 
-
+            
             dotCount++;
-            yield return new WaitForSeconds(0.00005f);
+            
         }
+        yield return null;
         stillDrawing = false;
-      //  yield return new WaitUntil(() => stillAiming == false);
         
-        
+        //  yield return new WaitUntil(() => stillAiming == false);
+
+
     }
 }

@@ -13,7 +13,6 @@ public class BallEnemyScript : Enemy
     private bool isChasingRight;
     private bool isChasingLeft;
     private bool hitState;
-    private AudioSource audio;
     private AudioClip roll;
 
     float count;
@@ -39,7 +38,7 @@ public class BallEnemyScript : Enemy
     private GameObject laserBody;
 
     float headLength;
-    float bodyLength; 
+    float bodyLength;
 
 
 
@@ -140,6 +139,8 @@ public class BallEnemyScript : Enemy
         {
             Debug.Log("Could not find laser body");
         }
+
+        damageCaused = -1;
    
         //  lightOrigin = GetComponentsInChildren<Transform>()[1].rotation;
 
@@ -438,7 +439,7 @@ public class BallEnemyScript : Enemy
 
                     }
                     player.GetComponent<ArtrobotController>().KnockBack();
-                    player.GetComponent<PlayerHealthScript>().DamageOrHealth(-1);
+                    player.GetComponent<PlayerHealthScript>().DamageOrHealth(damageCaused);
 
                     player.GetComponent<WowController>().Impact();
                 }
@@ -508,19 +509,16 @@ public class BallEnemyScript : Enemy
             Destroy(g);
         }
 
-        SetFallState(false);
-        audio.Stop();
-        AudioClip clip = (AudioClip)Resources.Load("SoundFX/power_down"); 
-        if (clip == null)
+        if (state.Equals(top))
         {
-            Debug.Log("Power Down SoundFX cannot be found");
+            SetState(idle);
         }
         else
         {
-            audio.clip = clip;
+            SetFallState(false);
         }
-        audio.loop = false;
-        audio.Play();
+      
+      
         
     }
 
@@ -617,7 +615,7 @@ public class BallEnemyScript : Enemy
     public override void OnTriggerEnter2D(Collider2D collision)
     {
         //      Debug.Log("Enemy Bullet collision detected");
-
+    //    base.OnTriggerEnter2D(collision);
         if (collision.IsTouching(GetComponents<Collider2D>()[1]))
         {
             
@@ -633,11 +631,7 @@ public class BallEnemyScript : Enemy
             {
                 //        Debug.Log("Bullet-Bullet collision detected");
                 //     GetComponent<BallEnemyAudioScript>().SwordAttack();
-                AudioClip impact = (AudioClip)Resources.Load("SoundFX/" +
-                    "zapsplat_impact_metal_thin_001_10694");
-                audio.clip = impact;
-                audio.Play();
-                audio.loop = false;
+               
                 StopCoroutine("RollBack");
                 StopCoroutine("DamageFade");
                 StartCoroutine("RollBack");
@@ -647,7 +641,7 @@ public class BallEnemyScript : Enemy
                 //Destroy(gameObject);         
                 Destroy(collision.gameObject);
             }
-            else if (collision.gameObject.CompareTag("Sword"))
+            else if (collision.gameObject.CompareTag("Sword") && !isFading)
             {
                 Debug.Log("Sword strike detected");
                 GetComponent<BallEnemyAudioScript>().SwordAttack();
@@ -658,6 +652,34 @@ public class BallEnemyScript : Enemy
 
                 TakeDamage(1);
                 // Destroy(gameObject);
+            }
+            else if (collision.gameObject.CompareTag("Player"))
+            {
+                if (!PlayerHealthScript.player.GetIsHitStunned())
+                {
+
+
+                    if (ArtrobotController.player.GetSubState().Equals("sword"))
+                    {
+                        ArtrobotController.player.SetSubState("none");
+                        ArtrobotController.player.GetComponentInChildren<SwordController>().Reset();
+                        ArtrobotController.player.anim.SetBool("sword", false);
+                    }
+
+                    PlayerHealthScript.player.DamageOrHealth(damageCaused);
+                    if (ArtrobotController.player.state.Equals("swinging") ||
+                        ArtrobotController.player.state.Equals("chaining"))
+                    {
+                        Debug.Log("Starting fall off swing");
+                        ArtrobotController.player.FallOffSwing();
+                    }
+                    else
+                    {
+                        ArtrobotController.player.KnockBack();
+                    }
+                    WowController.player.Impact();
+                }
+
             }
 
 
@@ -674,7 +696,7 @@ public class BallEnemyScript : Enemy
 
     public override void OnCollisionEnter2D(Collision2D collision)
     {
-      //  base.OnCollisionEnter2D(collision);
+      
 
         Debug.Log("Colliding with " + collision.gameObject);
         
@@ -689,7 +711,24 @@ public class BallEnemyScript : Enemy
                     c.enabled = false;
                 }
             }
-        }
+        } 
+        //if (collision.gameObject.layer == 9)
+        //{
+        //    Collider2D[] playerCollider = new Collider2D[ArtrobotController.artTrans.
+        //    GetComponent<Rigidbody2D>().attachedColliderCount];
+        //    ArtrobotController.artTrans.
+        //        GetComponent<Rigidbody2D>().GetAttachedColliders(playerCollider);
+        //    Collider2D rgdCollider = GetComponents<Collider2D>()[0];
+        //    Debug.Log("Collider count = " + ArtrobotController.artTrans.GetComponent<Rigidbody2D>().attachedColliderCount);
+
+
+
+        //    foreach (Collider2D c in playerCollider)
+        //    {
+        //        Debug.Log("Ignore Collision = " + Physics2D.GetIgnoreCollision(rgdCollider, c));
+        //    }
+        //    Debug.Log("Ball collision with " + collision.gameObject.name);
+        //}
     }
 
     private void OnCollisionStay2D(Collision2D collision)
